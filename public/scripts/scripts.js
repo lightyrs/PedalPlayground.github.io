@@ -21382,12 +21382,638 @@ S2.define('jquery.select2',[
   return select2;
 }));
 
+/**! 
+ * hotkeys-js v3.10.0 
+ * A simple micro-library for defining and dispatching keyboard shortcuts. It has no dependencies. 
+ * 
+ * Copyright (c) 2022 kenny wong <wowohoo@qq.com> 
+ * http://jaywcjlove.github.io/hotkeys 
+ * Licensed under the MIT license 
+ */
+
+(function (global, factory) {
+  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+  typeof define === 'function' && define.amd ? define(factory) :
+  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.hotkeys = factory());
+})(this, (function () { 'use strict';
+
+  var isff = typeof navigator !== 'undefined' ? navigator.userAgent.toLowerCase().indexOf('firefox') > 0 : false; // 绑定事件
+
+  function addEvent(object, event, method, useCapture) {
+    if (object.addEventListener) {
+      object.addEventListener(event, method, useCapture);
+    } else if (object.attachEvent) {
+      object.attachEvent("on".concat(event), function () {
+        method(window.event);
+      });
+    }
+  } // 修饰键转换成对应的键码
+
+
+  function getMods(modifier, key) {
+    var mods = key.slice(0, key.length - 1);
+
+    for (var i = 0; i < mods.length; i++) {
+      mods[i] = modifier[mods[i].toLowerCase()];
+    }
+
+    return mods;
+  } // 处理传的key字符串转换成数组
+
+
+  function getKeys(key) {
+    if (typeof key !== 'string') key = '';
+    key = key.replace(/\s/g, ''); // 匹配任何空白字符,包括空格、制表符、换页符等等
+
+    var keys = key.split(','); // 同时设置多个快捷键，以','分割
+
+    var index = keys.lastIndexOf(''); // 快捷键可能包含','，需特殊处理
+
+    for (; index >= 0;) {
+      keys[index - 1] += ',';
+      keys.splice(index, 1);
+      index = keys.lastIndexOf('');
+    }
+
+    return keys;
+  } // 比较修饰键的数组
+
+
+  function compareArray(a1, a2) {
+    var arr1 = a1.length >= a2.length ? a1 : a2;
+    var arr2 = a1.length >= a2.length ? a2 : a1;
+    var isIndex = true;
+
+    for (var i = 0; i < arr1.length; i++) {
+      if (arr2.indexOf(arr1[i]) === -1) isIndex = false;
+    }
+
+    return isIndex;
+  }
+
+  var _keyMap = {
+    backspace: 8,
+    '⌫': 8,
+    tab: 9,
+    clear: 12,
+    enter: 13,
+    '↩': 13,
+    return: 13,
+    esc: 27,
+    escape: 27,
+    space: 32,
+    left: 37,
+    up: 38,
+    right: 39,
+    down: 40,
+    del: 46,
+    delete: 46,
+    ins: 45,
+    insert: 45,
+    home: 36,
+    end: 35,
+    pageup: 33,
+    pagedown: 34,
+    capslock: 20,
+    num_0: 96,
+    num_1: 97,
+    num_2: 98,
+    num_3: 99,
+    num_4: 100,
+    num_5: 101,
+    num_6: 102,
+    num_7: 103,
+    num_8: 104,
+    num_9: 105,
+    num_multiply: 106,
+    num_add: 107,
+    num_enter: 108,
+    num_subtract: 109,
+    num_decimal: 110,
+    num_divide: 111,
+    '⇪': 20,
+    ',': 188,
+    '.': 190,
+    '/': 191,
+    '`': 192,
+    '-': isff ? 173 : 189,
+    '=': isff ? 61 : 187,
+    ';': isff ? 59 : 186,
+    '\'': 222,
+    '[': 219,
+    ']': 221,
+    '\\': 220
+  }; // Modifier Keys
+
+  var _modifier = {
+    // shiftKey
+    '⇧': 16,
+    shift: 16,
+    // altKey
+    '⌥': 18,
+    alt: 18,
+    option: 18,
+    // ctrlKey
+    '⌃': 17,
+    ctrl: 17,
+    control: 17,
+    // metaKey
+    '⌘': 91,
+    cmd: 91,
+    command: 91
+  };
+  var modifierMap = {
+    16: 'shiftKey',
+    18: 'altKey',
+    17: 'ctrlKey',
+    91: 'metaKey',
+    shiftKey: 16,
+    ctrlKey: 17,
+    altKey: 18,
+    metaKey: 91
+  };
+  var _mods = {
+    16: false,
+    18: false,
+    17: false,
+    91: false
+  };
+  var _handlers = {}; // F1~F12 special key
+
+  for (var k = 1; k < 20; k++) {
+    _keyMap["f".concat(k)] = 111 + k;
+  }
+
+  var _downKeys = []; // 记录摁下的绑定键
+
+  var winListendFocus = false; // window是否已经监听了focus事件
+
+  var _scope = 'all'; // 默认热键范围
+
+  var elementHasBindEvent = []; // 已绑定事件的节点记录
+  // 返回键码
+
+  var code = function code(x) {
+    return _keyMap[x.toLowerCase()] || _modifier[x.toLowerCase()] || x.toUpperCase().charCodeAt(0);
+  };
+
+  var getKey = function getKey(x) {
+    return Object.keys(_keyMap).find(function (k) {
+      return _keyMap[k] === x;
+    });
+  };
+
+  var getModifier = function getModifier(x) {
+    return Object.keys(_modifier).find(function (k) {
+      return _modifier[k] === x;
+    });
+  }; // 设置获取当前范围（默认为'所有'）
+
+
+  function setScope(scope) {
+    _scope = scope || 'all';
+  } // 获取当前范围
+
+
+  function getScope() {
+    return _scope || 'all';
+  } // 获取摁下绑定键的键值
+
+
+  function getPressedKeyCodes() {
+    return _downKeys.slice(0);
+  }
+
+  function getPressedKeyString() {
+    return _downKeys.map(function (c) {
+      return getKey(c) || getModifier(c) || String.fromCharCode(c);
+    });
+  } // 表单控件控件判断 返回 Boolean
+  // hotkey is effective only when filter return true
+
+
+  function filter(event) {
+    var target = event.target || event.srcElement;
+    var tagName = target.tagName;
+    var flag = true; // ignore: isContentEditable === 'true', <input> and <textarea> when readOnly state is false, <select>
+
+    if (target.isContentEditable || (tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT') && !target.readOnly) {
+      flag = false;
+    }
+
+    return flag;
+  } // 判断摁下的键是否为某个键，返回true或者false
+
+
+  function isPressed(keyCode) {
+    if (typeof keyCode === 'string') {
+      keyCode = code(keyCode); // 转换成键码
+    }
+
+    return _downKeys.indexOf(keyCode) !== -1;
+  } // 循环删除handlers中的所有 scope(范围)
+
+
+  function deleteScope(scope, newScope) {
+    var handlers;
+    var i; // 没有指定scope，获取scope
+
+    if (!scope) scope = getScope();
+
+    for (var key in _handlers) {
+      if (Object.prototype.hasOwnProperty.call(_handlers, key)) {
+        handlers = _handlers[key];
+
+        for (i = 0; i < handlers.length;) {
+          if (handlers[i].scope === scope) handlers.splice(i, 1);else i++;
+        }
+      }
+    } // 如果scope被删除，将scope重置为all
+
+
+    if (getScope() === scope) setScope(newScope || 'all');
+  } // 清除修饰键
+
+
+  function clearModifier(event) {
+    var key = event.keyCode || event.which || event.charCode;
+
+    var i = _downKeys.indexOf(key); // 从列表中清除按压过的键
+
+
+    if (i >= 0) {
+      _downKeys.splice(i, 1);
+    } // 特殊处理 cmmand 键，在 cmmand 组合快捷键 keyup 只执行一次的问题
+
+
+    if (event.key && event.key.toLowerCase() === 'meta') {
+      _downKeys.splice(0, _downKeys.length);
+    } // 修饰键 shiftKey altKey ctrlKey (command||metaKey) 清除
+
+
+    if (key === 93 || key === 224) key = 91;
+
+    if (key in _mods) {
+      _mods[key] = false; // 将修饰键重置为false
+
+      for (var k in _modifier) {
+        if (_modifier[k] === key) hotkeys[k] = false;
+      }
+    }
+  }
+
+  function unbind(keysInfo) {
+    // unbind(), unbind all keys
+    if (typeof keysInfo === 'undefined') {
+      Object.keys(_handlers).forEach(function (key) {
+        return delete _handlers[key];
+      });
+    } else if (Array.isArray(keysInfo)) {
+      // support like : unbind([{key: 'ctrl+a', scope: 's1'}, {key: 'ctrl-a', scope: 's2', splitKey: '-'}])
+      keysInfo.forEach(function (info) {
+        if (info.key) eachUnbind(info);
+      });
+    } else if (typeof keysInfo === 'object') {
+      // support like unbind({key: 'ctrl+a, ctrl+b', scope:'abc'})
+      if (keysInfo.key) eachUnbind(keysInfo);
+    } else if (typeof keysInfo === 'string') {
+      for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        args[_key - 1] = arguments[_key];
+      }
+
+      // support old method
+      // eslint-disable-line
+      var scope = args[0],
+          method = args[1];
+
+      if (typeof scope === 'function') {
+        method = scope;
+        scope = '';
+      }
+
+      eachUnbind({
+        key: keysInfo,
+        scope: scope,
+        method: method,
+        splitKey: '+'
+      });
+    }
+  } // 解除绑定某个范围的快捷键
+
+
+  var eachUnbind = function eachUnbind(_ref) {
+    var key = _ref.key,
+        scope = _ref.scope,
+        method = _ref.method,
+        _ref$splitKey = _ref.splitKey,
+        splitKey = _ref$splitKey === void 0 ? '+' : _ref$splitKey;
+    var multipleKeys = getKeys(key);
+    multipleKeys.forEach(function (originKey) {
+      var unbindKeys = originKey.split(splitKey);
+      var len = unbindKeys.length;
+      var lastKey = unbindKeys[len - 1];
+      var keyCode = lastKey === '*' ? '*' : code(lastKey);
+      if (!_handlers[keyCode]) return; // 判断是否传入范围，没有就获取范围
+
+      if (!scope) scope = getScope();
+      var mods = len > 1 ? getMods(_modifier, unbindKeys) : [];
+      _handlers[keyCode] = _handlers[keyCode].filter(function (record) {
+        // 通过函数判断，是否解除绑定，函数相等直接返回
+        var isMatchingMethod = method ? record.method === method : true;
+        return !(isMatchingMethod && record.scope === scope && compareArray(record.mods, mods));
+      });
+    });
+  }; // 对监听对应快捷键的回调函数进行处理
+
+
+  function eventHandler(event, handler, scope, element) {
+    if (handler.element !== element) {
+      return;
+    }
+
+    var modifiersMatch; // 看它是否在当前范围
+
+    if (handler.scope === scope || handler.scope === 'all') {
+      // 检查是否匹配修饰符（如果有返回true）
+      modifiersMatch = handler.mods.length > 0;
+
+      for (var y in _mods) {
+        if (Object.prototype.hasOwnProperty.call(_mods, y)) {
+          if (!_mods[y] && handler.mods.indexOf(+y) > -1 || _mods[y] && handler.mods.indexOf(+y) === -1) {
+            modifiersMatch = false;
+          }
+        }
+      } // 调用处理程序，如果是修饰键不做处理
+
+
+      if (handler.mods.length === 0 && !_mods[16] && !_mods[18] && !_mods[17] && !_mods[91] || modifiersMatch || handler.shortcut === '*') {
+        if (handler.method(event, handler) === false) {
+          if (event.preventDefault) event.preventDefault();else event.returnValue = false;
+          if (event.stopPropagation) event.stopPropagation();
+          if (event.cancelBubble) event.cancelBubble = true;
+        }
+      }
+    }
+  } // 处理keydown事件
+
+
+  function dispatch(event, element) {
+    var asterisk = _handlers['*'];
+    var key = event.keyCode || event.which || event.charCode; // 表单控件过滤 默认表单控件不触发快捷键
+
+    if (!hotkeys.filter.call(this, event)) return; // Gecko(Firefox)的command键值224，在Webkit(Chrome)中保持一致
+    // Webkit左右 command 键值不一样
+
+    if (key === 93 || key === 224) key = 91;
+    /**
+     * Collect bound keys
+     * If an Input Method Editor is processing key input and the event is keydown, return 229.
+     * https://stackoverflow.com/questions/25043934/is-it-ok-to-ignore-keydown-events-with-keycode-229
+     * http://lists.w3.org/Archives/Public/www-dom/2010JulSep/att-0182/keyCode-spec.html
+     */
+
+    if (_downKeys.indexOf(key) === -1 && key !== 229) _downKeys.push(key);
+    /**
+     * Jest test cases are required.
+     * ===============================
+     */
+
+    ['ctrlKey', 'altKey', 'shiftKey', 'metaKey'].forEach(function (keyName) {
+      var keyNum = modifierMap[keyName];
+
+      if (event[keyName] && _downKeys.indexOf(keyNum) === -1) {
+        _downKeys.push(keyNum);
+      } else if (!event[keyName] && _downKeys.indexOf(keyNum) > -1) {
+        _downKeys.splice(_downKeys.indexOf(keyNum), 1);
+      } else if (keyName === 'metaKey' && event[keyName] && _downKeys.length === 3) {
+        /**
+         * Fix if Command is pressed:
+         * ===============================
+         */
+        if (!(event.ctrlKey || event.shiftKey || event.altKey)) {
+          _downKeys = _downKeys.slice(_downKeys.indexOf(keyNum));
+        }
+      }
+    });
+    /**
+     * -------------------------------
+     */
+
+    if (key in _mods) {
+      _mods[key] = true; // 将特殊字符的key注册到 hotkeys 上
+
+      for (var k in _modifier) {
+        if (_modifier[k] === key) hotkeys[k] = true;
+      }
+
+      if (!asterisk) return;
+    } // 将 modifierMap 里面的修饰键绑定到 event 中
+
+
+    for (var e in _mods) {
+      if (Object.prototype.hasOwnProperty.call(_mods, e)) {
+        _mods[e] = event[modifierMap[e]];
+      }
+    }
+    /**
+     * https://github.com/jaywcjlove/hotkeys/pull/129
+     * This solves the issue in Firefox on Windows where hotkeys corresponding to special characters would not trigger.
+     * An example of this is ctrl+alt+m on a Swedish keyboard which is used to type μ.
+     * Browser support: https://caniuse.com/#feat=keyboardevent-getmodifierstate
+     */
+
+
+    if (event.getModifierState && !(event.altKey && !event.ctrlKey) && event.getModifierState('AltGraph')) {
+      if (_downKeys.indexOf(17) === -1) {
+        _downKeys.push(17);
+      }
+
+      if (_downKeys.indexOf(18) === -1) {
+        _downKeys.push(18);
+      }
+
+      _mods[17] = true;
+      _mods[18] = true;
+    } // 获取范围 默认为 `all`
+
+
+    var scope = getScope(); // 对任何快捷键都需要做的处理
+
+    if (asterisk) {
+      for (var i = 0; i < asterisk.length; i++) {
+        if (asterisk[i].scope === scope && (event.type === 'keydown' && asterisk[i].keydown || event.type === 'keyup' && asterisk[i].keyup)) {
+          eventHandler(event, asterisk[i], scope, element);
+        }
+      }
+    } // key 不在 _handlers 中返回
+
+
+    if (!(key in _handlers)) return;
+
+    for (var _i = 0; _i < _handlers[key].length; _i++) {
+      if (event.type === 'keydown' && _handlers[key][_i].keydown || event.type === 'keyup' && _handlers[key][_i].keyup) {
+        if (_handlers[key][_i].key) {
+          var record = _handlers[key][_i];
+          var splitKey = record.splitKey;
+          var keyShortcut = record.key.split(splitKey);
+          var _downKeysCurrent = []; // 记录当前按键键值
+
+          for (var a = 0; a < keyShortcut.length; a++) {
+            _downKeysCurrent.push(code(keyShortcut[a]));
+          }
+
+          if (_downKeysCurrent.sort().join('') === _downKeys.sort().join('')) {
+            // 找到处理内容
+            eventHandler(event, record, scope, element);
+          }
+        }
+      }
+    }
+  } // 判断 element 是否已经绑定事件
+
+
+  function isElementBind(element) {
+    return elementHasBindEvent.indexOf(element) > -1;
+  }
+
+  function hotkeys(key, option, method) {
+    _downKeys = [];
+    var keys = getKeys(key); // 需要处理的快捷键列表
+
+    var mods = [];
+    var scope = 'all'; // scope默认为all，所有范围都有效
+
+    var element = document; // 快捷键事件绑定节点
+
+    var i = 0;
+    var keyup = false;
+    var keydown = true;
+    var splitKey = '+';
+    var capture = false; // 对为设定范围的判断
+
+    if (method === undefined && typeof option === 'function') {
+      method = option;
+    }
+
+    if (Object.prototype.toString.call(option) === '[object Object]') {
+      if (option.scope) scope = option.scope; // eslint-disable-line
+
+      if (option.element) element = option.element; // eslint-disable-line
+
+      if (option.keyup) keyup = option.keyup; // eslint-disable-line
+
+      if (option.keydown !== undefined) keydown = option.keydown; // eslint-disable-line
+
+      if (option.capture !== undefined) capture = option.capture; // eslint-disable-line
+
+      if (typeof option.splitKey === 'string') splitKey = option.splitKey; // eslint-disable-line
+    }
+
+    if (typeof option === 'string') scope = option; // 对于每个快捷键进行处理
+
+    for (; i < keys.length; i++) {
+      key = keys[i].split(splitKey); // 按键列表
+
+      mods = []; // 如果是组合快捷键取得组合快捷键
+
+      if (key.length > 1) mods = getMods(_modifier, key); // 将非修饰键转化为键码
+
+      key = key[key.length - 1];
+      key = key === '*' ? '*' : code(key); // *表示匹配所有快捷键
+      // 判断key是否在_handlers中，不在就赋一个空数组
+
+      if (!(key in _handlers)) _handlers[key] = [];
+
+      _handlers[key].push({
+        keyup: keyup,
+        keydown: keydown,
+        scope: scope,
+        mods: mods,
+        shortcut: keys[i],
+        method: method,
+        key: keys[i],
+        splitKey: splitKey,
+        element: element
+      });
+    } // 在全局document上设置快捷键
+
+
+    if (typeof element !== 'undefined' && !isElementBind(element) && window) {
+      elementHasBindEvent.push(element);
+      addEvent(element, 'keydown', function (e) {
+        dispatch(e, element);
+      }, capture);
+
+      if (!winListendFocus) {
+        winListendFocus = true;
+        addEvent(window, 'focus', function () {
+          _downKeys = [];
+        }, capture);
+      }
+
+      addEvent(element, 'keyup', function (e) {
+        dispatch(e, element);
+        clearModifier(e);
+      }, capture);
+    }
+  }
+
+  function trigger(shortcut) {
+    var scope = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'all';
+    Object.keys(_handlers).forEach(function (key) {
+      var data = _handlers[key].find(function (item) {
+        return item.scope === scope && item.shortcut === shortcut;
+      });
+
+      if (data && data.method) {
+        data.method();
+      }
+    });
+  }
+
+  var _api = {
+    getPressedKeyString: getPressedKeyString,
+    setScope: setScope,
+    getScope: getScope,
+    deleteScope: deleteScope,
+    getPressedKeyCodes: getPressedKeyCodes,
+    isPressed: isPressed,
+    filter: filter,
+    trigger: trigger,
+    unbind: unbind,
+    keyMap: _keyMap,
+    modifier: _modifier,
+    modifierMap: modifierMap
+  };
+
+  for (var a in _api) {
+    if (Object.prototype.hasOwnProperty.call(_api, a)) {
+      hotkeys[a] = _api[a];
+    }
+  }
+
+  if (typeof window !== 'undefined') {
+    var _hotkeys = window.hotkeys;
+
+    hotkeys.noConflict = function (deep) {
+      if (deep && window.hotkeys === hotkeys) {
+        window.hotkeys = _hotkeys;
+      }
+
+      return hotkeys;
+    };
+
+    window.hotkeys = hotkeys;
+  }
+
+  return hotkeys;
+
+}));
+
 !function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"function"==typeof define&&define.amd?define(["exports"],e):e((t="undefined"!=typeof globalThis?globalThis:t||self).htmlToImage={})}(this,(function(t){"use strict";function e(t,e,n,r){return new(n||(n=Promise))((function(i,o){function c(t){try{a(r.next(t))}catch(t){o(t)}}function u(t){try{a(r.throw(t))}catch(t){o(t)}}function a(t){var e;t.done?i(t.value):(e=t.value,e instanceof n?e:new n((function(t){t(e)}))).then(c,u)}a((r=r.apply(t,e||[])).next())}))}function n(t,e){var n,r,i,o,c={label:0,sent:function(){if(1&i[0])throw i[1];return i[1]},trys:[],ops:[]};return o={next:u(0),throw:u(1),return:u(2)},"function"==typeof Symbol&&(o[Symbol.iterator]=function(){return this}),o;function u(o){return function(u){return function(o){if(n)throw new TypeError("Generator is already executing.");for(;c;)try{if(n=1,r&&(i=2&o[0]?r.return:o[0]?r.throw||((i=r.return)&&i.call(r),0):r.next)&&!(i=i.call(r,o[1])).done)return i;switch(r=0,i&&(o=[2&o[0],i.value]),o[0]){case 0:case 1:i=o;break;case 4:return c.label++,{value:o[1],done:!1};case 5:c.label++,r=o[1],o=[0];continue;case 7:o=c.ops.pop(),c.trys.pop();continue;default:if(!(i=c.trys,(i=i.length>0&&i[i.length-1])||6!==o[0]&&2!==o[0])){c=0;continue}if(3===o[0]&&(!i||o[1]>i[0]&&o[1]<i[3])){c.label=o[1];break}if(6===o[0]&&c.label<i[1]){c.label=i[1],i=o;break}if(i&&c.label<i[2]){c.label=i[2],c.ops.push(o);break}i[2]&&c.ops.pop(),c.trys.pop();continue}o=e.call(t,c)}catch(t){o=[6,t],r=0}finally{n=i=0}if(5&o[0])throw o[1];return{value:o[0]?o[1]:void 0,done:!0}}([o,u])}}}var r="application/font-woff",i="image/jpeg",o={woff:r,woff2:r,ttf:"application/font-truetype",eot:"application/vnd.ms-fontobject",png:"image/png",jpg:i,jpeg:i,gif:"image/gif",tiff:"image/tiff",svg:"image/svg+xml"};function c(t){var e=function(t){var e=/\.([^./]*?)$/g.exec(t);return e?e[1]:""}(t).toLowerCase();return o[e]||""}function u(t){return-1!==t.search(/^(data:)/)}function a(t,e){return"data:".concat(e,";base64,").concat(t)}function s(t,r,i){return e(this,void 0,void 0,(function(){var e,o;return n(this,(function(n){switch(n.label){case 0:return[4,fetch(t,r)];case 1:if(404===(e=n.sent()).status)throw new Error('Resource "'.concat(e.url,'" not found'));return[4,e.blob()];case 2:return o=n.sent(),[2,new Promise((function(t,n){var r=new FileReader;r.onerror=n,r.onloadend=function(){try{t(i({res:e,result:r.result}))}catch(t){n(t)}},r.readAsDataURL(o)}))]}}))}))}var l={};function f(t,r,i){return e(this,void 0,void 0,(function(){var e,o,c,u,f;return n(this,(function(n){switch(n.label){case 0:if(e=function(t,e,n){var r=t.replace(/\?.*/,"");return n&&(r=t),/ttf|otf|eot|woff2?/i.test(r)&&(r=r.replace(/.*\//,"")),e?"[".concat(e,"]").concat(r):r}(t,r,i.includeQueryParams),null!=l[e])return[2,l[e]];i.cacheBust&&(t+=(/\?/.test(t)?"&":"?")+(new Date).getTime()),n.label=1;case 1:return n.trys.push([1,3,,4]),[4,s(t,i.fetchRequestInit,(function(t){var e=t.res,n=t.result;return r||(r=e.headers.get("Content-Type")||""),function(t){return t.split(/,/)[1]}(n)}))];case 2:return c=n.sent(),o=a(c,r),[3,4];case 3:return u=n.sent(),o=i.imagePlaceholder||"",f="Failed to fetch resource: ".concat(t),u&&(f="string"==typeof u?u:u.message),f&&console.warn(f),[3,4];case 4:return l[e]=o,[2,o]}}))}))}var h,d=(h=0,function(){return h+=1,"u".concat("0000".concat((Math.random()*Math.pow(36,4)<<0).toString(36)).slice(-4)).concat(h)});function v(t){for(var e=[],n=0,r=t.length;n<r;n++)e.push(t[n]);return e}function p(t,e){var n=(t.ownerDocument.defaultView||window).getComputedStyle(t).getPropertyValue(e);return n?parseFloat(n.replace("px","")):0}function g(t,e){void 0===e&&(e={});var n,r,i,o=e.width||(r=p(n=t,"border-left-width"),i=p(n,"border-right-width"),n.clientWidth+r+i),c=e.height||function(t){var e=p(t,"border-top-width"),n=p(t,"border-bottom-width");return t.clientHeight+e+n}(t);return{width:o,height:c}}var m=16384;function w(t,e){return void 0===e&&(e={}),t.toBlob?new Promise((function(n){t.toBlob(n,e.type?e.type:"image/png",e.quality?e.quality:1)})):new Promise((function(n){for(var r=window.atob(t.toDataURL(e.type?e.type:void 0,e.quality?e.quality:void 0).split(",")[1]),i=r.length,o=new Uint8Array(i),c=0;c<i;c+=1)o[c]=r.charCodeAt(c);n(new Blob([o],{type:e.type?e.type:"image/png"}))}))}function b(t){return new Promise((function(e,n){var r=new Image;r.onload=function(){return e(r)},r.onerror=n,r.crossOrigin="anonymous",r.decoding="sync",r.src=t}))}function y(t){return e(this,void 0,void 0,(function(){return n(this,(function(e){return[2,Promise.resolve().then((function(){return(new XMLSerializer).serializeToString(t)})).then(encodeURIComponent).then((function(t){return"data:image/svg+xml;charset=utf-8,".concat(t)}))]}))}))}function x(t,r,i){return e(this,void 0,void 0,(function(){var e,o,c;return n(this,(function(n){return e="http://www.w3.org/2000/svg",o=document.createElementNS(e,"svg"),c=document.createElementNS(e,"foreignObject"),o.setAttribute("width","".concat(r)),o.setAttribute("height","".concat(i)),o.setAttribute("viewBox","0 0 ".concat(r," ").concat(i)),c.setAttribute("width","100%"),c.setAttribute("height","100%"),c.setAttribute("x","0"),c.setAttribute("y","0"),c.setAttribute("externalResourcesRequired","true"),o.appendChild(c),c.appendChild(t),[2,y(o)]}))}))}function S(t,e,n){var r=".".concat(t,":").concat(e),i=n.cssText?function(t){var e=t.getPropertyValue("content");return"".concat(t.cssText," content: '").concat(e.replace(/'|"/g,""),"';")}(n):function(t){return v(t).map((function(e){var n=t.getPropertyValue(e),r=t.getPropertyPriority(e);return"".concat(e,": ").concat(n).concat(r?" !important":"",";")})).join(" ")}(n);return document.createTextNode("".concat(r,"{").concat(i,"}"))}function E(t,e,n){var r=window.getComputedStyle(t,n),i=r.getPropertyValue("content");if(""!==i&&"none"!==i){var o=d();try{e.className="".concat(e.className," ").concat(o)}catch(t){return}var c=document.createElement("style");c.appendChild(S(o,n,r)),e.appendChild(c)}}function P(t){return e(this,void 0,void 0,(function(){var e;return n(this,(function(n){return"data:,"===(e=t.toDataURL())?[2,t.cloneNode(!1)]:[2,b(e)]}))}))}function C(t,r){return e(this,void 0,void 0,(function(){var e,i;return n(this,(function(n){switch(n.label){case 0:return e=t.poster,i=c(e),[4,f(e,i,r)];case 1:return[2,b(n.sent())]}}))}))}function R(t,e){return e instanceof Element&&(function(t,e){var n=e.style;if(n){var r=window.getComputedStyle(t);r.cssText?(n.cssText=r.cssText,n.transformOrigin=r.transformOrigin):v(r).forEach((function(t){var e=r.getPropertyValue(t);if("font-size"===t&&e.endsWith("px")){var i=Math.floor(parseFloat(e.substring(0,e.length-2)))-.1;e="".concat(i,"px")}n.setProperty(t,e,r.getPropertyPriority(t))}))}}(t,e),function(t,e){E(t,e,":before"),E(t,e,":after")}(t,e),function(t,e){t instanceof HTMLTextAreaElement&&(e.innerHTML=t.value),t instanceof HTMLInputElement&&e.setAttribute("value",t.value)}(t,e),function(t,e){if(t instanceof HTMLSelectElement){var n=e,r=Array.from(n.children).find((function(e){return t.value===e.getAttribute("value")}));r&&r.setAttribute("selected","")}}(t,e)),e}function T(t,r,i){return e(this,void 0,void 0,(function(){return n(this,(function(o){return i||!r.filter||r.filter(t)?[2,Promise.resolve(t).then((function(t){return function(t,r){return e(this,void 0,void 0,(function(){return n(this,(function(e){return t instanceof HTMLCanvasElement?[2,P(t)]:t instanceof HTMLVideoElement&&t.poster?[2,C(t,r)]:[2,t.cloneNode(!1)]}))}))}(t,r)})).then((function(i){return function(t,r,i){var o;return e(this,void 0,void 0,(function(){var e;return n(this,(function(n){switch(n.label){case 0:return 0===(e=null!=(c=t).tagName&&"SLOT"===c.tagName.toUpperCase()&&t.assignedNodes?v(t.assignedNodes()):v((null!==(o=t.shadowRoot)&&void 0!==o?o:t).childNodes)).length||t instanceof HTMLVideoElement?[2,r]:[4,e.reduce((function(t,e){return t.then((function(){return T(e,i)})).then((function(t){t&&r.appendChild(t)}))}),Promise.resolve())];case 1:return n.sent(),[2,r]}var c}))}))}(t,i,r)})).then((function(e){return R(t,e)}))]:[2,null]}))}))}var L=/url\((['"]?)([^'"]+?)\1\)/g,k=/url\([^)]+\)\s*format\((["']?)([^"']+)\1\)/g,A=/src:\s*(?:url\([^)]+\)\s*format\([^)]+\)[,;]\s*)+/g;function I(t,r,i,o,u){return e(this,void 0,void 0,(function(){var e,s,l,h;return n(this,(function(n){switch(n.label){case 0:return n.trys.push([0,5,,6]),e=i?function(t,e){if(t.match(/^[a-z]+:\/\//i))return t;if(t.match(/^\/\//))return window.location.protocol+t;if(t.match(/^[a-z]+:/i))return t;var n=document.implementation.createHTMLDocument(),r=n.createElement("base"),i=n.createElement("a");return n.head.appendChild(r),n.body.appendChild(i),e&&(r.href=e),i.href=t,i.href}(r,i):r,s=c(r),l=void 0,u?[4,u(e)]:[3,2];case 1:return h=n.sent(),l=a(h,s),[3,4];case 2:return[4,f(e,s,o)];case 3:l=n.sent(),n.label=4;case 4:return[2,t.replace((d=r,v=d.replace(/([.*+?^${}()|\[\]\/\\])/g,"\\$1"),new RegExp("(url\\(['\"]?)(".concat(v,")(['\"]?\\))"),"g")),"$1".concat(l,"$3"))];case 5:return n.sent(),[3,6];case 6:return[2,t]}var d,v}))}))}function N(t){return-1!==t.search(L)}function M(t,r,i){return e(this,void 0,void 0,(function(){var e,o;return n(this,(function(n){return N(t)?(e=function(t,e){var n=e.preferredFontFormat;return n?t.replace(A,(function(t){for(;;){var e=k.exec(t)||[],r=e[0],i=e[2];if(!i)return"";if(i===n)return"src: ".concat(r,";")}})):t}(t,i),o=function(t){var e=[];return t.replace(L,(function(t,n,r){return e.push(r),t})),e.filter((function(t){return!u(t)}))}(e),[2,o.reduce((function(t,e){return t.then((function(t){return I(t,e,r,i)}))}),Promise.resolve(e))]):[2,t]}))}))}function V(t,r){var i;return e(this,void 0,void 0,(function(){var e,o;return n(this,(function(n){switch(n.label){case 0:return(e=null===(i=t.style)||void 0===i?void 0:i.getPropertyValue("background"))?[4,M(e,null,r)]:[3,2];case 1:o=n.sent(),t.style.setProperty("background",o,t.style.getPropertyPriority("background")),n.label=2;case 2:return[2]}}))}))}function D(t,r){return e(this,void 0,void 0,(function(){var e,i;return n(this,(function(n){switch(n.label){case 0:return t instanceof HTMLImageElement&&!u(t.src)||t instanceof SVGImageElement&&!u(t.href.baseVal)?[4,f(e=t instanceof HTMLImageElement?t.src:t.href.baseVal,c(e),r)]:[2];case 1:return i=n.sent(),[4,new Promise((function(e,n){t.onload=e,t.onerror=n,t instanceof HTMLImageElement?(t.srcset="",t.src=i):t.href.baseVal=i}))];case 2:return n.sent(),[2]}}))}))}function H(t,r){return e(this,void 0,void 0,(function(){var e,i;return n(this,(function(n){switch(n.label){case 0:return e=v(t.childNodes),i=e.map((function(t){return j(t,r)})),[4,Promise.all(i).then((function(){return t}))];case 1:return n.sent(),[2]}}))}))}function j(t,r){return e(this,void 0,void 0,(function(){return n(this,(function(e){switch(e.label){case 0:return t instanceof Element?[4,V(t,r)]:[3,4];case 1:return e.sent(),[4,D(t,r)];case 2:return e.sent(),[4,H(t,r)];case 3:e.sent(),e.label=4;case 4:return[2]}}))}))}var U={};function F(t){return e(this,void 0,void 0,(function(){var e,r;return n(this,(function(n){switch(n.label){case 0:return null!=(e=U[t])?[2,e]:[4,fetch(t)];case 1:return[4,n.sent().text()];case 2:return r=n.sent(),e={url:t,cssText:r},U[t]=e,[2,e]}}))}))}function O(t,r){return e(this,void 0,void 0,(function(){var i,o,c,u,a=this;return n(this,(function(l){return i=t.cssText,o=/url\(["']?([^"')]+)["']?\)/g,c=i.match(/url\([^)]+\)/g)||[],u=c.map((function(c){return e(a,void 0,void 0,(function(){var e;return n(this,(function(n){return(e=c.replace(o,"$1")).startsWith("https://")||(e=new URL(e,t.url).href),[2,s(e,r.fetchRequestInit,(function(t){var e=t.result;return i=i.replace(c,"url(".concat(e,")")),[c,e]}))]}))}))})),[2,Promise.all(u).then((function(){return i}))]}))}))}function q(t){if(null==t)return[];for(var e=[],n=t.replace(/(\/\*[\s\S]*?\*\/)/gi,""),r=new RegExp("((@.*?keyframes [\\s\\S]*?){([\\s\\S]*?}\\s*?)})","gi");;){if(null===(c=r.exec(n)))break;e.push(c[0])}n=n.replace(r,"");for(var i=/@import[\s\S]*?url\([^)]*\)[\s\S]*?;/gi,o=new RegExp("((\\s*?(?:\\/\\*[\\s\\S]*?\\*\\/)?\\s*?@media[\\s\\S]*?){([\\s\\S]*?)}\\s*?})|(([\\s\\S]*?){([\\s\\S]*?)})","gi");;){var c;if(null===(c=i.exec(n))){if(null===(c=o.exec(n)))break;i.lastIndex=o.lastIndex}else o.lastIndex=i.lastIndex;e.push(c[0])}return e}function B(t,r){return e(this,void 0,void 0,(function(){var e,i;return n(this,(function(n){return e=[],i=[],t.forEach((function(e){if("cssRules"in e)try{v(e.cssRules||[]).forEach((function(t,n){if(t.type===CSSRule.IMPORT_RULE){var o=n+1,c=F(t.href).then((function(t){return O(t,r)})).then((function(t){return q(t).forEach((function(t){try{e.insertRule(t,t.startsWith("@import")?o+=1:e.cssRules.length)}catch(e){console.error("Error inserting rule from remote css",{rule:t,error:e})}}))})).catch((function(t){console.error("Error loading remote css",t.toString())}));i.push(c)}}))}catch(o){var n=t.find((function(t){return null==t.href}))||document.styleSheets[0];null!=e.href&&i.push(F(e.href).then((function(t){return O(t,r)})).then((function(t){return q(t).forEach((function(t){n.insertRule(t,e.cssRules.length)}))})).catch((function(t){console.error("Error loading remote stylesheet",t.toString())}))),console.error("Error inlining remote css file",o.toString())}})),[2,Promise.all(i).then((function(){return t.forEach((function(t){if("cssRules"in t)try{v(t.cssRules||[]).forEach((function(t){e.push(t)}))}catch(e){console.error("Error while reading CSS rules from ".concat(t.href),e.toString())}})),e}))]}))}))}function $(t){return t.filter((function(t){return t.type===CSSRule.FONT_FACE_RULE})).filter((function(t){return N(t.style.getPropertyValue("src"))}))}function z(t,r){return e(this,void 0,void 0,(function(){return n(this,(function(e){switch(e.label){case 0:if(null==t.ownerDocument)throw new Error("Provided element is not within a Document");return[4,B(v(t.ownerDocument.styleSheets),r)];case 1:return[2,$(e.sent())]}}))}))}function W(t,r){return e(this,void 0,void 0,(function(){var e;return n(this,(function(n){switch(n.label){case 0:return[4,z(t,r)];case 1:return e=n.sent(),[4,Promise.all(e.map((function(t){var e=t.parentStyleSheet?t.parentStyleSheet.href:null;return M(t.cssText,e,r)})))];case 2:return[2,n.sent().join("\n")]}}))}))}function _(t,r){return e(this,void 0,void 0,(function(){var e,i,o,c,u;return n(this,(function(n){switch(n.label){case 0:return null==r.fontEmbedCSS?[3,1]:(i=r.fontEmbedCSS,[3,5]);case 1:return r.skipFonts?(o=null,[3,4]):[3,2];case 2:return[4,W(t,r)];case 3:o=n.sent(),n.label=4;case 4:i=o,n.label=5;case 5:return(e=i)&&(c=document.createElement("style"),u=document.createTextNode(e),c.appendChild(u),t.firstChild?t.insertBefore(c,t.firstChild):t.appendChild(c)),[2]}}))}))}function G(t,r){return void 0===r&&(r={}),e(this,void 0,void 0,(function(){var e,i,o,c;return n(this,(function(n){switch(n.label){case 0:return e=g(t,r),i=e.width,o=e.height,[4,T(t,r,!0)];case 1:return[4,_(c=n.sent(),r)];case 2:return n.sent(),[4,j(c,r)];case 3:return n.sent(),function(t,e){var n=t.style;e.backgroundColor&&(n.backgroundColor=e.backgroundColor),e.width&&(n.width="".concat(e.width,"px")),e.height&&(n.height="".concat(e.height,"px"));var r=e.style;null!=r&&Object.keys(r).forEach((function(t){n[t]=r[t]}))}(c,r),[4,x(c,i,o)];case 4:return[2,n.sent()]}}))}))}function J(t,r){return void 0===r&&(r={}),e(this,void 0,void 0,(function(){var e,i,o,c,u,a,s,l,f;return n(this,(function(n){switch(n.label){case 0:return e=g(t,r),i=e.width,o=e.height,[4,G(t,r)];case 1:return[4,b(n.sent())];case 2:return c=n.sent(),u=document.createElement("canvas"),a=u.getContext("2d"),s=r.pixelRatio||function(){var t,e;try{e=process}catch(t){}var n=e&&e.env?e.env.devicePixelRatio:null;return n&&(t=parseInt(n,10),Number.isNaN(t)&&(t=1)),t||window.devicePixelRatio||1}(),l=r.canvasWidth||i,f=r.canvasHeight||o,u.width=l*s,u.height=f*s,r.skipAutoScale||function(t){(t.width>m||t.height>m)&&(t.width>m&&t.height>m?t.width>t.height?(t.height*=m/t.width,t.width=m):(t.width*=m/t.height,t.height=m):t.width>m?(t.height*=m/t.width,t.width=m):(t.width*=m/t.height,t.height=m))}(u),u.style.width="".concat(l),u.style.height="".concat(f),r.backgroundColor&&(a.fillStyle=r.backgroundColor,a.fillRect(0,0,u.width,u.height)),a.drawImage(c,0,0,u.width,u.height),[2,u]}}))}))}t.getFontEmbedCSS=function(t,r){return void 0===r&&(r={}),e(this,void 0,void 0,(function(){return n(this,(function(e){return[2,W(t,r)]}))}))},t.toBlob=function(t,r){return void 0===r&&(r={}),e(this,void 0,void 0,(function(){return n(this,(function(e){switch(e.label){case 0:return[4,J(t,r)];case 1:return[4,w(e.sent())];case 2:return[2,e.sent()]}}))}))},t.toCanvas=J,t.toJpeg=function(t,r){return void 0===r&&(r={}),e(this,void 0,void 0,(function(){return n(this,(function(e){switch(e.label){case 0:return[4,J(t,r)];case 1:return[2,e.sent().toDataURL("image/jpeg",r.quality||1)]}}))}))},t.toPixelData=function(t,r){return void 0===r&&(r={}),e(this,void 0,void 0,(function(){var e,i,o,c;return n(this,(function(n){switch(n.label){case 0:return e=g(t,r),i=e.width,o=e.height,[4,J(t,r)];case 1:return c=n.sent(),[2,c.getContext("2d").getImageData(0,0,i,o).data]}}))}))},t.toPng=function(t,r){return void 0===r&&(r={}),e(this,void 0,void 0,(function(){return n(this,(function(e){switch(e.label){case 0:return[4,J(t,r)];case 1:return[2,e.sent().toDataURL()]}}))}))},t.toSvg=G,Object.defineProperty(t,"__esModule",{value:!0})}));
 //# sourceMappingURL=html-to-image.js.map
 
 !function(n,r){"object"==typeof exports&&"undefined"!=typeof module?r(exports):"function"==typeof define&&define.amd?define(["exports"],r):r(n.commonTags=n.commonTags||{})}(this,function(n){"use strict";var r,t,o=function(){function e(n,r){for(var t=0;t<r.length;t++){var e=r[t];e.enumerable=e.enumerable||!1,e.configurable=!0,"value"in e&&(e.writable=!0),Object.defineProperty(n,e.key,e)}}return function(n,r,t){return r&&e(n.prototype,r),t&&e(n,t),n}}(),i=(r=["",""],t=["",""],Object.freeze(Object.defineProperties(r,{raw:{value:Object.freeze(t)}})));var e=function(){function e(){for(var o=this,n=arguments.length,r=Array(n),t=0;t<n;t++)r[t]=arguments[t];return function(n,r){if(!(n instanceof r))throw new TypeError("Cannot call a class as a function")}(this,e),this.tag=function(n){for(var r=arguments.length,t=Array(1<r?r-1:0),e=1;e<r;e++)t[e-1]=arguments[e];return"function"==typeof n?o.interimTag.bind(o,n):"string"==typeof n?o.transformEndResult(n):(n=n.map(o.transformString.bind(o)),o.transformEndResult(n.reduce(o.processSubstitutions.bind(o,t))))},0<r.length&&Array.isArray(r[0])&&(r=r[0]),this.transformers=r.map(function(n){return"function"==typeof n?n():n}),this.tag}return o(e,[{key:"interimTag",value:function(n,r){for(var t=arguments.length,e=Array(2<t?t-2:0),o=2;o<t;o++)e[o-2]=arguments[o];return this.tag(i,n.apply(void 0,[r].concat(e)))}},{key:"processSubstitutions",value:function(n,r,t){var e=this.transformSubstitution(n.shift(),r);return"".concat(r,e,t)}},{key:"transformString",value:function(n){return this.transformers.reduce(function(n,r){return r.onString?r.onString(n):n},n)}},{key:"transformSubstitution",value:function(n,t){return this.transformers.reduce(function(n,r){return r.onSubstitution?r.onSubstitution(n,t):n},n)}},{key:"transformEndResult",value:function(n){return this.transformers.reduce(function(n,r){return r.onEndResult?r.onEndResult(n):n},n)}}]),e}(),u=function(){var r=0<arguments.length&&void 0!==arguments[0]?arguments[0]:"";return{onEndResult:function(n){if(""===r)return n.trim();if("start"===(r=r.toLowerCase())||"left"===r)return n.replace(/^\s*/,"");if("end"===r||"right"===r)return n.replace(/\s*$/,"");throw new Error("Side not supported: "+r)}}};var a=function(){var o=0<arguments.length&&void 0!==arguments[0]?arguments[0]:"initial";return{onEndResult:function(n){if("initial"===o){var r=n.match(/^[^\S\n]*(?=\S)/gm),t=r&&Math.min.apply(Math,function(n){if(Array.isArray(n)){for(var r=0,t=Array(n.length);r<n.length;r++)t[r]=n[r];return t}return Array.from(n)}(r.map(function(n){return n.length})));if(t){var e=new RegExp("^.{"+t+"}","gm");return n.replace(e,"")}return n}if("all"===o)return n.replace(/^[^\S\n]+/gm,"");throw new Error("Unknown type: "+o)}}},s=function(r,t){return{onEndResult:function(n){if(null==r||null==t)throw new Error("replaceResultTransformer requires at least 2 arguments.");return n.replace(r,t)}}},f=function(t,e){return{onSubstitution:function(n,r){if(null==t||null==e)throw new Error("replaceSubstitutionTransformer requires at least 2 arguments.");return null==n?n:n.toString().replace(t,e)}}},c={separator:"",conjunction:"",serial:!1},l=function(){var s=0<arguments.length&&void 0!==arguments[0]?arguments[0]:c;return{onSubstitution:function(n,r){if(Array.isArray(n)){var t=n.length,e=s.separator,o=s.conjunction,i=s.serial,u=r.match(/(\n?[^\S\n]+)$/);if(n=u?n.join(e+u[1]):n.join(e+" "),o&&1<t){var a=n.lastIndexOf(e);n=n.slice(0,a)+(i?e:"")+" "+o+n.slice(a+1)}}return n}}},m=function(t){return{onSubstitution:function(n,r){if(null==t||"string"!=typeof t)throw new Error("You need to specify a string character to split by.");return"string"==typeof n&&n.includes(t)&&(n=n.split(t)),n}}},p=function(n){return null!=n&&!Number.isNaN(n)&&"boolean"!=typeof n},g=function(){return{onSubstitution:function(n){return Array.isArray(n)?n.filter(p):p(n)?n:""}}},d=new e(l({separator:","}),a,u),h=new e(l({separator:",",conjunction:"and"}),a,u),y=new e(l({separator:",",conjunction:"or"}),a,u),w=new e(m("\n"),g,l,a,u),v=new e(m("\n"),l,a,u,f(/&/g,"&amp;"),f(/</g,"&lt;"),f(/>/g,"&gt;"),f(/"/g,"&quot;"),f(/'/g,"&#x27;"),f(/`/g,"&#x60;")),b=new e(s(/(?:\n(?:\s*))+/g," "),u),S=new e(s(/(?:\n\s*)/g,""),u),T=new e(l({separator:","}),s(/(?:\s+)/g," "),u),A=new e(l({separator:",",conjunction:"or"}),s(/(?:\s+)/g," "),u),E=new e(l({separator:",",conjunction:"and"}),s(/(?:\s+)/g," "),u),L=new e(l,a,u),j=new e(l,s(/(?:\s+)/g," "),u),R=new e(a,u),k=new e(a("all"),u);n.TemplateTag=e,n.trimResultTransformer=u,n.stripIndentTransformer=a,n.replaceResultTransformer=s,n.replaceSubstitutionTransformer=f,n.replaceStringTransformer=function(r,t){return{onString:function(n){if(null==r||null==t)throw new Error("replaceStringTransformer requires at least 2 arguments.");return n.replace(r,t)}}},n.inlineArrayTransformer=l,n.splitStringTransformer=m,n.removeNonPrintingValuesTransformer=g,n.commaLists=d,n.commaListsAnd=h,n.commaListsOr=y,n.html=w,n.codeBlock=w,n.source=w,n.safeHtml=v,n.oneLine=b,n.oneLineTrim=S,n.oneLineCommaLists=T,n.oneLineCommaListsOr=A,n.oneLineCommaListsAnd=E,n.inlineLists=L,n.oneLineInlineLists=j,n.stripIndent=R,n.stripIndents=k,Object.defineProperty(n,"__esModule",{value:!0})});
-
-// import { html } from "common-tags";
 
 const pedalImagePath = "public/images/pedals/";
 const pedalboardImagePath = "public/images/pedalboards/";
@@ -21449,38 +22075,32 @@ $(document).ready(() => {
     $(".canvas").css("background-size", `${multiplier}px`);
 
     // Update all items with stored scale
-    $(".item").each(function () {
-      $(this).attr("data-scale", multiplier);
-    });
+    document.querySelectorAll(".item").forEach((element) => {
+      element.setAttribute("data-scale", multiplier);
+      const artwork = element.querySelector(".artwork");
+      const scaledWidth = element.dataset.width * multiplier;
+      const scaledHeight = element.dataset.height * multiplier;
 
-    // Update regular Pedals
-    $(".pedalboard").each(function () {
-      const scaledWidth = $(this).data("width") * multiplier;
-      const scaledHeight = $(this).data("height") * multiplier;
-      $(this).find(".artwork").css("width", scaledWidth).css("height", scaledHeight);
-    });
+      if (artwork != null) {
+        $(artwork).css({
+          width: scaledWidth,
+          height: scaledHeight,
+        });
+      }
 
-    // Update regular Pedals
-    $(".pedal, .pedalboard").each(function () {
-      const scaledWidth = $(this).data("width") * multiplier;
-      const scaledHeight = $(this).data("height") * multiplier;
-      $(this).find(".artwork").css("width", scaledWidth).css("height", scaledHeight);
-    });
+      if (
+        element.classList.contains("pedal--custom") ||
+        element.classList.contains("pedalboard--custom")
+      ) {
+        $(element).css({
+          width: scaledWidth,
+          height: scaledHeight,
+        });
+      }
 
-    // Update custom pedals
-    $(".pedal--custom, .pedalboard--custom").each(function () {
-      const scaledWidth = $(this).data("width") * multiplier;
-      const scaledHeight = $(this).data("height") * multiplier;
-      $(this).css("width", scaledWidth).css("height", scaledHeight);
-    });
-    $(".pedalboard--custom").each(function () {
-      const scaledWidth = $(this).data("width") * multiplier;
-      const scaledHeight = $(this).data("height") * multiplier;
-      $(this).css({
-        width: scaledWidth,
-        height: scaledHeight,
-        borderWidth: multiplier * 0.5,
-      });
+      if (element.classList.contains("pedalboard--custom")) {
+        $(element).css({ borderWidth: multiplier * 0.5 });
+      }
     });
 
     savePedalCanvas();
@@ -21514,7 +22134,7 @@ $(document).ready(() => {
     const scaledHeight = $(selected).data("height") * multiplier;
     const i = $(selected).data("image");
     const pedal = commonTags.html`
-      <div id="item-${serial}" class="item pedal ${shortname}" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
+      <div id="item-${serial}" class="item pedal ${shortname} rotate-0" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
         <div class="artwork" style="width:${scaledWidth}px;height:${scaledHeight}px; background-image:url(${pedalImagePath}${i})"></div>
         <div class="shadow"></div>
         <div class="actions">
@@ -21541,7 +22161,7 @@ $(document).ready(() => {
     const scaledHeight = $(selected).data("height") * multiplier;
     const i = $(selected).data("image");
     const pedal = commonTags.html`
-      <div id="item-${serial}" class="item pedalboard ${shortname}" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
+      <div id="item-${serial}" class="item pedalboard ${shortname} rotate-0" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
         <div class="artwork" style="width:${scaledWidth}px;height:${scaledHeight}px; background-image:url(${pedalboardImagePath}${i})"></div>
         <div class="actions">
           <a class="rotate"></a>
@@ -21573,7 +22193,7 @@ $(document).ready(() => {
     const name = $("#add-custom-pedal .custom-name").val();
     const image = $("#add-custom-pedal .custom-color").val();
     const pedal = commonTags.html`
-      <div id="item-${serial}" class="item pedal pedal--custom" style="width:${scaledWidth}px;height:${scaledHeight}px;" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
+      <div id="item-${serial}" class="item pedal pedal--custom rotate-0" style="width:${scaledWidth}px;height:${scaledHeight}px;" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
         <span class="pedal__box" style="background-color:${image};"></span>
         <span class="pedal__name">${name}</span>
         <span class="pedal__jack1"></span>
@@ -21592,9 +22212,7 @@ $(document).ready(() => {
     $("#add-custom-pedal .invalid").removeClass("invalid");
 
     if (width == "" || height == "") {
-      $("#add-custom-pedal .custom-height, #add-custom-pedal .custom-width").addClass(
-        "invalid"
-      );
+      $("#add-custom-pedal .custom-height, #add-custom-pedal .custom-width").addClass("invalid");
       $("#add-custom-pedal .custom-width").focus();
     } else if (width == "") {
       $("#add-custom-pedal .custom-width").addClass("invalid").focus();
@@ -21604,7 +22222,6 @@ $(document).ready(() => {
       console.log("add custom pedal...");
       $(".canvas").append(pedal);
       readyCanvas();
-      // console.log(dims);
       ga("send", "event", "CustomPedal", "added", `${dims} ${name}`);
       event.preventDefault();
     }
@@ -21622,9 +22239,9 @@ $(document).ready(() => {
     $("#add-custom-pedalboard .invalid").removeClass("invalid");
 
     if (width == "" || height == "") {
-      $(
-        "#add-custom-pedalboard .custom-height, #add-custom-pedalboard .custom-width"
-      ).addClass("invalid");
+      $("#add-custom-pedalboard .custom-height, #add-custom-pedalboard .custom-width").addClass(
+        "invalid"
+      );
       $("#add-custom-pedalboard .custom-width").focus();
     } else if (width == "") {
       $("#add-custom-pedalboard .custom-width").addClass("invalid").focus();
@@ -21634,8 +22251,9 @@ $(document).ready(() => {
       console.log("add custom pedalboard...");
       const dims = `${width}" x ${height}"`;
       const pedalboard = commonTags.html`
-        <div id="item-${serial}" class="item pedalboard pedalboard--custom" style="width:${scaledWidth}px;height:${scaledHeight}px; border-width:${
-        multiplier / 2}px" title="Custom Pedalboard" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
+        <div id="item-${serial}" class="item pedalboard pedalboard--custom rotate-0" style="width:${scaledWidth}px;height:${scaledHeight}px; border-width:${
+        multiplier / 2
+      }px" title="Custom Pedalboard" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
           <div class="actions">
             <a class="delete"></a>
             <a class="rotate"></a>
@@ -21650,97 +22268,86 @@ $(document).ready(() => {
     }
   });
 
-  // On keydown of "D" or "delete" remove pedal
-  $("body").on("keydown keyup", ({ which }) => {
-    if (which == 68 || which == 8) {
-      deleteSelected();
-      $(".site-body > .panel").remove();
-      savePedalCanvas();
-    }
-  });
-
-  // On keydown of "[", move pedal back
-  $("body").on("keydown keyup", ({ which }) => {
-    if (which == 219) {
-      $(".panel a[href='#back']").click();
-      savePedalCanvas();
-    }
-  });
-
-  // On keydown of "]", move pedal front
-  $("body").on("keydown keyup", ({ which }) => {
-    if (which == 221) {
-      $(".panel a[href='#front']").click();
-      savePedalCanvas();
-    }
-  });
-
-  // 37 - left
-  // 38 - up
-  // 39 - right
-  // 40 - down
-
-  // Move left
-  $("body").on("keydown", ({ which }) => {
-    if (which == 37) {
-      const current = parseInt($(".canvas .selected").css("left"));
-      $(".canvas .selected").css("left", current - 1);
-      savePedalCanvas();
-    }
-  });
-
-  // Move up
-  $("body").on("keydown", (event) => {
-    if (event.which == 38) {
-      const current = parseInt($(".canvas .selected").css("top"));
-      $(".canvas .selected").css("top", current - 1);
-      event.preventDefault();
-      savePedalCanvas();
-    }
-  });
-
-  // Move right
-  $("body").on("keydown", ({ which }) => {
-    if (which == 39) {
-      const current = parseInt($(".canvas .selected").css("left"));
-      $(".canvas .selected").css("left", current + 1);
-      savePedalCanvas();
-    }
-  });
-
-  // Move down
-  $("body").on("keydown", (event) => {
-    if (event.which == 40) {
-      const current = parseInt($(".canvas .selected").css("top"));
-      $(".canvas .selected").css("top", current + 1);
-      event.preventDefault();
-      savePedalCanvas();
-    }
-  });
-
-  $("body").on("keydown", (event) => {
-    event.stopPropagation();
-
-    //mvital: in some cases click event is sent multiple times to the handler - no idea why
-    //mvital: seems calling stopImmediatePropagation() helps
-    event.stopImmediatePropagation();
-
-    if (event.which == 82) {
-      if ($(".canvas .selected").hasClass("rotate-90")) {
-        $(".canvas .selected").removeClass("rotate-90");
-        $(".canvas .selected").addClass("rotate-180");
-      } else if ($(".canvas .selected").hasClass("rotate-180")) {
-        $(".canvas .selected").removeClass("rotate-180");
-        $(".canvas .selected").addClass("rotate-270");
-      } else if ($(".canvas .selected").hasClass("rotate-270")) {
-        $(".canvas .selected").removeClass("rotate-270");
-      } else {
-        $(".canvas .selected").addClass("rotate-90");
+  hotkeys(
+    "[, ], shift+d, shift+del, shift+delete, shift+backspace",
+    { keyup: true },
+    (event, handler) => {
+      if (event.type === "keyup") {
+        switch (handler.key) {
+          case "shift+d":
+          case "shift+del":
+          case "shift+delete":
+          case "shift+backspace":
+            deleteSelected();
+            $(".site-body > .panel").remove();
+            break;
+          case "[":
+            $(".panel a[href='#back']").click();
+            break;
+          case "]":
+            $(".panel a[href='#front']").click();
+            break;
+        }
+        savePedalCanvas();
       }
-      savePedalCanvas();
     }
+  );
+
+  hotkeys(
+    "up, down, left, right, shift+up, shift+down, shift+left, shift+right",
+    (event, handler) => {
+      const cssArgs = (() => {
+        switch (handler.key) {
+          case "up":
+            return ["top", parseInt($(".canvas .selected").css("top")) - 1];
+          case "shift+up":
+            return ["top", parseInt($(".canvas .selected").css("top")) - 10];
+          case "down":
+            return ["top", parseInt($(".canvas .selected").css("top")) + 1];
+          case "shift+down":
+            return ["top", parseInt($(".canvas .selected").css("top")) + 10];
+          case "left":
+            return ["left", parseInt($(".canvas .selected").css("left")) - 1];
+          case "shift+left":
+            return ["left", parseInt($(".canvas .selected").css("left")) - 10];
+          case "right":
+            return ["left", parseInt($(".canvas .selected").css("left")) + 1];
+          case "shift+right":
+            return ["left", parseInt($(".canvas .selected").css("left")) + 10];
+        }
+      })();
+
+      $(".canvas .selected").css(...cssArgs);
+      savePedalCanvas();
+
+      return false;
+    }
+  );
+
+  const rotations = cycle([90, 180, 270, 0]);
+
+  hotkeys("r", (event, handler) => {
+    const selected = document.querySelectorAll(".canvas .selected")[0]
+
+    selected.className = selected.className.replace(
+      /(^|\s)rotate-\S+/g,
+      `$1rotate-${rotations.next().value}`
+    );
+    savePedalCanvas();
+
+    return false;
   });
 }); // End Document ready
+
+function* cycle(values) {
+  let iterationCount = 0;
+  let valuesLength = values.length;
+
+  while (true) {
+    yield values[iterationCount % valuesLength];
+    iterationCount++;
+  }
+}
 
 function readyCanvas(pedal) {
   const $draggable = $(".canvas .pedal, .canvas .pedalboard").draggabilly({

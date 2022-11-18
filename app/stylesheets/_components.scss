@@ -9,6 +9,7 @@ $body-color-dark: lighten($dark, 60%);
 
 body {
 	background: white;
+
 	@media (prefers-color-scheme: dark) {
 		background: $header-bg-dark;
 		color: $body-color-dark;
@@ -22,19 +23,23 @@ body {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
+
 	h1 {
 		text-transform: uppercase;
 		margin: 0;
 		font-size: 16px;
+
 		@media (min-width: 500px) {
 			font-size: 22px;
 		}
 	}
+
 	nav {
 		a {
 			text-decoration: underline;
 			margin-left: 1rem;
 			font-size: 1.3rem;
+
 			@media (min-width: 500px) {
 				font-size: 1.5rem;
 				text-decoration: none;
@@ -47,9 +52,11 @@ body {
 			}
 		}
 	}
+
 	@media (prefers-color-scheme: dark) {
 		background: $header-bg-dark;
 		color: #555;
+
 		h1 {
 			color: #f8f8f8;
 		}
@@ -62,6 +69,7 @@ body {
 	min-width: 1400px;
 	position: relative;
 	@include flexbox;
+
 	@media (prefers-color-scheme: dark) {
 		border-top: 1px solid #323037;
 		border-color: rgba(white, 0.1);
@@ -71,6 +79,7 @@ body {
 
 .sidebar-close {
 	display: none;
+
 	@media (max-width: 1023px) {
 		display: block;
 		position: absolute;
@@ -79,9 +88,11 @@ body {
 		right: 0;
 		bottom: 70%;
 		opacity: 1;
+
 		.text {
 			display: none;
 		}
+
 		.glyphicon {
 			color: white;
 			font-size: 30px;
@@ -96,6 +107,7 @@ body {
 
 .sidebar-open {
 	display: none;
+
 	@media (max-width: 1023px) {
 		display: block;
 		position: fixed;
@@ -108,9 +120,11 @@ body {
 		border-radius: 50%;
 		font-size: 0;
 		box-shadow: 8px 8px 20px rgba($brand-primary, 0.5);
+
 		@media (prefers-color-scheme: dark) {
 			box-shadow: none;
 		}
+
 		&:before,
 		&:after {
 			content: " ";
@@ -118,11 +132,13 @@ body {
 			background: white;
 			border-radius: 3px;
 		}
+
 		&:before {
 			@include size(4px, 30px);
 			left: 30px;
 			top: 17px;
 		}
+
 		&:after {
 			@include size(30px, 4px);
 			left: 17px;
@@ -140,6 +156,7 @@ body {
 	.select2-container {
 		width: 100%;
 	}
+
 	@media (max-width: 1023px) {
 		position: fixed;
 		top: 0;
@@ -153,10 +170,12 @@ body {
 		pointer-events: none;
 		touch-events: none;
 		background: rgba(black, 0.7);
+
 		@media (prefers-color-scheme: dark) {
 			$tint: lighten($brand-primary, 0%);
 			background: rgba($tint, 0.5);
 		}
+
 		.sidebar__inner {
 			transition: all 0.3s;
 			position: absolute;
@@ -167,6 +186,7 @@ body {
 			overflow: auto;
 			-webkit-overflow-scrolling: touch;
 			background-color: #fff;
+
 			@media (prefers-color-scheme: dark) {
 				background-color: $panel-bg-dark;
 			}
@@ -176,17 +196,20 @@ body {
 			opacity: 1;
 			pointer-events: all;
 			touch-events: all;
+
 			.sidebar__inner {
 				top: 30%;
 			}
 		}
 	}
+
 	@media (min-width: 1024px) {
 		max-width: 290px;
 		box-shadow: 0 1px 5px rgba(black, 0.16);
 		// padding: 20px;
 		background: #fff;
 		border-right: $border;
+
 		@media (prefers-color-scheme: dark) {
 			/* Dark theme styles go here */
 			background-color: $panel-bg-dark;
@@ -194,10 +217,13 @@ body {
 			border: 0;
 		}
 	}
+
 	&__section {
 		padding: 2rem;
-		& + & {
+
+		&+& {
 			border-top: 2px solid #ddd;
+
 			// padding-top: 16px;
 			// margin-top: 16px;
 			@media (prefers-color-scheme: dark) {
@@ -205,6 +231,7 @@ body {
 			}
 		}
 	}
+
 	h4 {
 		font-size: 15px;
 	}
@@ -215,10 +242,12 @@ body {
 	overflow: hidden;
 	background-image: url("../images/grid.svg");
 	background-color: #f8f8f8;
+
 	@media (prefers-color-scheme: dark) {
 		background-color: $canvas-bg-dark;
 		background-image: url("../images/grid-dark.svg");
 	}
+
 	* {
 		-webkit-user-select: none;
 		-moz-user-select: none;
@@ -229,6 +258,7 @@ body {
 
 .item {
 	position: absolute;
+
 	// border: 1px solid transparent;
 	.artwork {
 		background-repeat: no-repeat;
@@ -259,32 +289,54 @@ body {
 		transition: all 0.15s;
 	}
 
+	&.rotate-0 {
+		.artwork {
+			@include rotate(0deg);
+			animation-fill-mode: forwards;
+		}
+	}
+
 	&.rotate-90 {
 		.artwork {
 			@include rotate(90deg);
+			animation-fill-mode: forwards;
 		}
 	}
+
 	&.rotate-180 {
 		.artwork {
 			@include rotate(180deg);
+			animation-fill-mode: forwards;
 		}
 	}
+
 	&.rotate-270 {
 		.artwork {
 			@include rotate(270deg);
+			animation-fill-mode: forwards;
 		}
 	}
 
 	&.pedal--custom,
 	&.pedalboard--custom {
+		&.rotate-0 {
+			@include rotate(0deg);
+			animation-fill-mode: forwards;
+		}
+
 		&.rotate-90 {
 			@include rotate(90deg);
+			animation-fill-mode: forwards;
 		}
+
 		&.rotate-180 {
 			@include rotate(180deg);
+			animation-fill-mode: forwards;
 		}
+
 		&.rotate-270 {
 			@include rotate(270deg);
+			animation-fill-mode: forwards;
 		}
 	}
 
@@ -311,23 +363,28 @@ body {
 			text-align: center;
 			width: 32px;
 			line-height: 10px;
+
 			&:before {
 				font-size: 10px;
 				line-height: 10px;
 				@extend .glyphicon;
 				@extend .glyphicon-remove;
 			}
+
 			&.rotate {
 				border-right: $border;
+
 				&:before {
 					@extend .glyphicon-refresh;
 					font-weight: bold;
 				}
 			}
 		}
+
 		@media (prefers-color-scheme: dark) {
 			background: #111;
 			border-color: rgba(white, 0.2);
+
 			a {
 				color: white;
 			}
@@ -339,6 +396,7 @@ body {
 		&:after {
 			border-color: rgba($brand-primary, 0.5);
 		}
+
 		.actions {
 			opacity: 1;
 		}
@@ -351,6 +409,7 @@ body {
 			//-webkit-filter: drop-shadow( $same );
 			//filter: drop-shadow( $same );
 		}
+
 		&:after {
 			border-color: $brand-primary;
 		}
@@ -368,21 +427,35 @@ body {
 	z-index: 1;
 	min-width: 5px;
 	min-height: 5px;
+
+	&.rotate-0 {
+		.artwork {
+			@include rotate(0deg);
+			animation-fill-mode: forwards;
+		}
+	}
+
 	&.rotate-90 {
 		.artwork {
 			@include rotate(90deg);
+			animation-fill-mode: forwards;
 		}
 	}
+
 	&.rotate-180 {
 		.artwork {
 			@include rotate(180deg);
+			animation-fill-mode: forwards;
 		}
 	}
+
 	&.rotate-270 {
 		.artwork {
 			@include rotate(270deg);
+			animation-fill-mode: forwards;
 		}
 	}
+
 	&__box {
 		border-radius: 4px;
 		// border: 1px solid rgba(black, 0.3);
@@ -394,6 +467,7 @@ body {
 		// left: 3px;
 		// right: 3px;
 	}
+
 	&__knob1,
 	&__knob2 {
 		border-radius: 40px;
@@ -406,12 +480,15 @@ body {
 		position: absolute;
 		top: 15%;
 	}
+
 	&__knob1 {
 		left: 20%;
 	}
+
 	&__knob2 {
 		right: 15%;
 	}
+
 	&__switch {
 		position: absolute;
 		background-color: #999;
@@ -424,6 +501,7 @@ body {
 		@include square(10px);
 		bottom: 10%;
 	}
+
 	&__name {
 		font-size: 8px;
 		text-align: center;
@@ -439,6 +517,7 @@ body {
 
 .pedalboard {
 	z-index: 1;
+
 	&--custom {
 		border: 5px solid #ddd;
 		border-top-color: #ccc;
@@ -450,19 +529,24 @@ body {
 #custom-items {
 	.nav-tabs {
 		margin: 14px 0;
+
 		li a {
 			padding: 8px 13px;
 			font-size: 12px;
 		}
 	}
+
 	.form-element {
 		margin-bottom: 15px;
+
 		&.left {
 			float: left;
 			width: 50%;
 		}
+
 		label {
 			font-size: 12px;
+
 			em {
 				font-size: 10px;
 				font-style: normal;
@@ -471,9 +555,11 @@ body {
 			}
 		}
 	}
+
 	.custom-width {
 		border-radius: 4px 0 0 4px;
 	}
+
 	.custom-height {
 		border-radius: 0 4px 4px 0;
 		border-left: 0;
@@ -491,6 +577,7 @@ body {
 	@include flexbox();
 	@include flex-wrap(wrap);
 	background: #222;
+
 	.pedal-listing {
 		@include flex(1 1 150px);
 		@include flexbox();
@@ -499,6 +586,7 @@ body {
 		@include flex-direction(column);
 		padding: 30px;
 		box-shadow: 1px 1px 0 0 rgba(white, 0.08);
+
 		img {
 			margin: auto;
 			display: block;
@@ -506,17 +594,20 @@ body {
 			max-height: 200px;
 			width: auto;
 		}
+
 		p {
 			margin-bottom: 0;
 			text-align: center;
 			color: white;
 		}
+
 		.pedal-brand {
 			opacity: 0.5;
 			font-weight: bold;
 			text-transform: uppercase;
 			font-size: $font-size-base - 4;
 		}
+
 		.pedal-name {
 			opacity: 0.9;
 			font-size: $font-size-base - 1;
@@ -526,6 +617,7 @@ body {
 
 .invalid {
 	border: 1px solid $brand-danger;
+
 	&:focus {
 		border: 1px solid $brand-danger;
 		box-shadow: 0 0 5px $brand-danger;
@@ -551,23 +643,28 @@ body {
 		border-radius: 10px;
 		box-shadow: 0 2px 6px rgba(black, 0.2);
 		width: 200px;
+
 		&__name {
 			font-size: 13px;
 			color: #999;
 			font-weight: 600;
 			padding: 10px;
+
 			.panel__dimensions {
 				font-weight: normal;
 			}
 		}
+
 		&__action {
 			font-size: 13px;
 			display: block;
 			padding: 10px;
 			border-top: 1px solid rgba(black, 0.2);
+
 			@media (prefers-color-scheme: dark) {
 				border-top: 1px solid rgba(white, 0.2);
 			}
+
 			i {
 				font-style: normal;
 				color: #999;
@@ -586,18 +683,22 @@ body {
 }
 
 #canvas-scale-form {
+
 	//display: none;
 	@media (max-width: 1099px) {
 		.input-group-addon {
 			display: none;
 		}
+
 		input {
 			border-radius: $border-radius-base;
 		}
+
 		.btn-sm {
 			display: none;
 		}
 	}
+
 	@media (min-width: 1100px) {
 		position: fixed;
 		z-index: 2;
@@ -610,17 +711,21 @@ body {
 		background: rgba(white, 0.5);
 		border: 1px solid rgba(black, 0.12);
 		border-top-left-radius: 5px;
+
 		@media (prefers-color-scheme: dark) {
 			background: $panel-bg-dark;
 			border-color: rgba(white, 0.12);
 		}
+
 		input {
 			width: 85px;
 		}
+
 		h5 {
 			line-height: 20px;
 			margin: 3px 8px 0 0;
 		}
+
 		h4 {
 			display: none;
 		}
@@ -637,19 +742,23 @@ body {
 
 .sidebar__tgs {
 	padding-left: 10rem;
+
 	img {
 		float: left;
 		width: 8rem;
 		margin-left: -10rem;
 	}
+
 	p {
 		margin-bottom: 0.4rem;
 	}
+
 	a {
 		font-size: 1.25rem;
 		color: #444;
 		text-decoration: underline;
 		font-weight: 700;
+
 		@media (prefers-color-scheme: dark) {
 			color: white;
 		}

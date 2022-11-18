@@ -92,13 +92,14 @@ gulp.task("scripts", function () {
       "node_modules/@bower_components/bootstrap-sass/assets/javascripts/bootstrap.js",
       "node_modules/@bower_components/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.js",
       "node_modules/@bower_components/select2/dist/js/select2.js",
+      "node_modules/hotkeys-js/dist/hotkeys.js",
       "node_modules/html-to-image/dist/html-to-image.js",
       "node_modules/common-tags/dist/common-tags.min.js",
       "app/scripts/scripts.js",
     ])
     .pipe(
       plumber({
-        errorHandler: reportError,
+        errorHandler: notify.onError("Error: <%= error.message %>"),
       })
     )
     .pipe(concat("scripts.js"))
@@ -142,7 +143,6 @@ gulp.task("watch", function () {
 
 gulp.task("watch-all", function () {
   livereload.listen();
-  //gulp.watch(['app/images/pedals/*.png','!app/images/pedals/*_tmp*.*'], ['images']);
   gulp.watch(
     gulp.series("app/images/pedals-new/**/*.png", "!app/images/pedals-new/**/*_tmp*.*", "process-images")
   );

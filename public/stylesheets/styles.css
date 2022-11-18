@@ -8747,41 +8747,61 @@ body {
   pointer-events: none;
   transition: all 0.15s;
 }
+.item.rotate-0 .artwork {
+  -webkit-transform: rotate(0deg);
+  -ms-transform: rotate(0deg);
+  -o-transform: rotate(0deg);
+  transform: rotate(0deg);
+  animation-fill-mode: forwards;
+}
 .item.rotate-90 .artwork {
   -webkit-transform: rotate(90deg);
   -ms-transform: rotate(90deg);
   -o-transform: rotate(90deg);
   transform: rotate(90deg);
+  animation-fill-mode: forwards;
 }
 .item.rotate-180 .artwork {
   -webkit-transform: rotate(180deg);
   -ms-transform: rotate(180deg);
   -o-transform: rotate(180deg);
   transform: rotate(180deg);
+  animation-fill-mode: forwards;
 }
 .item.rotate-270 .artwork {
   -webkit-transform: rotate(270deg);
   -ms-transform: rotate(270deg);
   -o-transform: rotate(270deg);
   transform: rotate(270deg);
+  animation-fill-mode: forwards;
+}
+.item.pedal--custom.rotate-0, .item.pedalboard--custom.rotate-0 {
+  -webkit-transform: rotate(0deg);
+  -ms-transform: rotate(0deg);
+  -o-transform: rotate(0deg);
+  transform: rotate(0deg);
+  animation-fill-mode: forwards;
 }
 .item.pedal--custom.rotate-90, .item.pedalboard--custom.rotate-90 {
   -webkit-transform: rotate(90deg);
   -ms-transform: rotate(90deg);
   -o-transform: rotate(90deg);
   transform: rotate(90deg);
+  animation-fill-mode: forwards;
 }
 .item.pedal--custom.rotate-180, .item.pedalboard--custom.rotate-180 {
   -webkit-transform: rotate(180deg);
   -ms-transform: rotate(180deg);
   -o-transform: rotate(180deg);
   transform: rotate(180deg);
+  animation-fill-mode: forwards;
 }
 .item.pedal--custom.rotate-270, .item.pedalboard--custom.rotate-270 {
   -webkit-transform: rotate(270deg);
   -ms-transform: rotate(270deg);
   -o-transform: rotate(270deg);
   transform: rotate(270deg);
+  animation-fill-mode: forwards;
 }
 .item .actions {
   z-index: 1;
@@ -8844,23 +8864,33 @@ body {
   min-width: 5px;
   min-height: 5px;
 }
+.pedal.rotate-0 .artwork {
+  -webkit-transform: rotate(0deg);
+  -ms-transform: rotate(0deg);
+  -o-transform: rotate(0deg);
+  transform: rotate(0deg);
+  animation-fill-mode: forwards;
+}
 .pedal.rotate-90 .artwork {
   -webkit-transform: rotate(90deg);
   -ms-transform: rotate(90deg);
   -o-transform: rotate(90deg);
   transform: rotate(90deg);
+  animation-fill-mode: forwards;
 }
 .pedal.rotate-180 .artwork {
   -webkit-transform: rotate(180deg);
   -ms-transform: rotate(180deg);
   -o-transform: rotate(180deg);
   transform: rotate(180deg);
+  animation-fill-mode: forwards;
 }
 .pedal.rotate-270 .artwork {
   -webkit-transform: rotate(270deg);
   -ms-transform: rotate(270deg);
   -o-transform: rotate(270deg);
   transform: rotate(270deg);
+  animation-fill-mode: forwards;
 }
 .pedal__box {
   border-radius: 4px;

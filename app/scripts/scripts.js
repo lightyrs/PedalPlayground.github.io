@@ -1,5 +1,3 @@
-// import { html } from "common-tags";
-
 const pedalImagePath = "public/images/pedals/";
 const pedalboardImagePath = "public/images/pedalboards/";
 
@@ -60,38 +58,32 @@ $(document).ready(() => {
     $(".canvas").css("background-size", `${multiplier}px`);
 
     // Update all items with stored scale
-    $(".item").each(function () {
-      $(this).attr("data-scale", multiplier);
-    });
+    document.querySelectorAll(".item").forEach((element) => {
+      element.setAttribute("data-scale", multiplier);
+      const artwork = element.querySelector(".artwork");
+      const scaledWidth = element.dataset.width * multiplier;
+      const scaledHeight = element.dataset.height * multiplier;
 
-    // Update regular Pedals
-    $(".pedalboard").each(function () {
-      const scaledWidth = $(this).data("width") * multiplier;
-      const scaledHeight = $(this).data("height") * multiplier;
-      $(this).find(".artwork").css("width", scaledWidth).css("height", scaledHeight);
-    });
+      if (artwork != null) {
+        $(artwork).css({
+          width: scaledWidth,
+          height: scaledHeight,
+        });
+      }
 
-    // Update regular Pedals
-    $(".pedal, .pedalboard").each(function () {
-      const scaledWidth = $(this).data("width") * multiplier;
-      const scaledHeight = $(this).data("height") * multiplier;
-      $(this).find(".artwork").css("width", scaledWidth).css("height", scaledHeight);
-    });
+      if (
+        element.classList.contains("pedal--custom") ||
+        element.classList.contains("pedalboard--custom")
+      ) {
+        $(element).css({
+          width: scaledWidth,
+          height: scaledHeight,
+        });
+      }
 
-    // Update custom pedals
-    $(".pedal--custom, .pedalboard--custom").each(function () {
-      const scaledWidth = $(this).data("width") * multiplier;
-      const scaledHeight = $(this).data("height") * multiplier;
-      $(this).css("width", scaledWidth).css("height", scaledHeight);
-    });
-    $(".pedalboard--custom").each(function () {
-      const scaledWidth = $(this).data("width") * multiplier;
-      const scaledHeight = $(this).data("height") * multiplier;
-      $(this).css({
-        width: scaledWidth,
-        height: scaledHeight,
-        borderWidth: multiplier * 0.5,
-      });
+      if (element.classList.contains("pedalboard--custom")) {
+        $(element).css({ borderWidth: multiplier * 0.5 });
+      }
     });
 
     savePedalCanvas();
@@ -125,7 +117,7 @@ $(document).ready(() => {
     const scaledHeight = $(selected).data("height") * multiplier;
     const i = $(selected).data("image");
     const pedal = commonTags.html`
-      <div id="item-${serial}" class="item pedal ${shortname}" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
+      <div id="item-${serial}" class="item pedal ${shortname} rotate-0" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
         <div class="artwork" style="width:${scaledWidth}px;height:${scaledHeight}px; background-image:url(${pedalImagePath}${i})"></div>
         <div class="shadow"></div>
         <div class="actions">
@@ -152,7 +144,7 @@ $(document).ready(() => {
     const scaledHeight = $(selected).data("height") * multiplier;
     const i = $(selected).data("image");
     const pedal = commonTags.html`
-      <div id="item-${serial}" class="item pedalboard ${shortname}" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
+      <div id="item-${serial}" class="item pedalboard ${shortname} rotate-0" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
         <div class="artwork" style="width:${scaledWidth}px;height:${scaledHeight}px; background-image:url(${pedalboardImagePath}${i})"></div>
         <div class="actions">
           <a class="rotate"></a>
@@ -184,7 +176,7 @@ $(document).ready(() => {
     const name = $("#add-custom-pedal .custom-name").val();
     const image = $("#add-custom-pedal .custom-color").val();
     const pedal = commonTags.html`
-      <div id="item-${serial}" class="item pedal pedal--custom" style="width:${scaledWidth}px;height:${scaledHeight}px;" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
+      <div id="item-${serial}" class="item pedal pedal--custom rotate-0" style="width:${scaledWidth}px;height:${scaledHeight}px;" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
         <span class="pedal__box" style="background-color:${image};"></span>
         <span class="pedal__name">${name}</span>
         <span class="pedal__jack1"></span>
@@ -203,9 +195,7 @@ $(document).ready(() => {
     $("#add-custom-pedal .invalid").removeClass("invalid");
 
     if (width == "" || height == "") {
-      $("#add-custom-pedal .custom-height, #add-custom-pedal .custom-width").addClass(
-        "invalid"
-      );
+      $("#add-custom-pedal .custom-height, #add-custom-pedal .custom-width").addClass("invalid");
       $("#add-custom-pedal .custom-width").focus();
     } else if (width == "") {
       $("#add-custom-pedal .custom-width").addClass("invalid").focus();
@@ -215,7 +205,6 @@ $(document).ready(() => {
       console.log("add custom pedal...");
       $(".canvas").append(pedal);
       readyCanvas();
-      // console.log(dims);
       ga("send", "event", "CustomPedal", "added", `${dims} ${name}`);
       event.preventDefault();
     }
@@ -233,9 +222,9 @@ $(document).ready(() => {
     $("#add-custom-pedalboard .invalid").removeClass("invalid");
 
     if (width == "" || height == "") {
-      $(
-        "#add-custom-pedalboard .custom-height, #add-custom-pedalboard .custom-width"
-      ).addClass("invalid");
+      $("#add-custom-pedalboard .custom-height, #add-custom-pedalboard .custom-width").addClass(
+        "invalid"
+      );
       $("#add-custom-pedalboard .custom-width").focus();
     } else if (width == "") {
       $("#add-custom-pedalboard .custom-width").addClass("invalid").focus();
@@ -245,8 +234,9 @@ $(document).ready(() => {
       console.log("add custom pedalboard...");
       const dims = `${width}" x ${height}"`;
       const pedalboard = commonTags.html`
-        <div id="item-${serial}" class="item pedalboard pedalboard--custom" style="width:${scaledWidth}px;height:${scaledHeight}px; border-width:${
-        multiplier / 2}px" title="Custom Pedalboard" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
+        <div id="item-${serial}" class="item pedalboard pedalboard--custom rotate-0" style="width:${scaledWidth}px;height:${scaledHeight}px; border-width:${
+        multiplier / 2
+      }px" title="Custom Pedalboard" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
           <div class="actions">
             <a class="delete"></a>
             <a class="rotate"></a>
@@ -261,97 +251,86 @@ $(document).ready(() => {
     }
   });
 
-  // On keydown of "D" or "delete" remove pedal
-  $("body").on("keydown keyup", ({ which }) => {
-    if (which == 68 || which == 8) {
-      deleteSelected();
-      $(".site-body > .panel").remove();
-      savePedalCanvas();
-    }
-  });
-
-  // On keydown of "[", move pedal back
-  $("body").on("keydown keyup", ({ which }) => {
-    if (which == 219) {
-      $(".panel a[href='#back']").click();
-      savePedalCanvas();
-    }
-  });
-
-  // On keydown of "]", move pedal front
-  $("body").on("keydown keyup", ({ which }) => {
-    if (which == 221) {
-      $(".panel a[href='#front']").click();
-      savePedalCanvas();
-    }
-  });
-
-  // 37 - left
-  // 38 - up
-  // 39 - right
-  // 40 - down
-
-  // Move left
-  $("body").on("keydown", ({ which }) => {
-    if (which == 37) {
-      const current = parseInt($(".canvas .selected").css("left"));
-      $(".canvas .selected").css("left", current - 1);
-      savePedalCanvas();
-    }
-  });
-
-  // Move up
-  $("body").on("keydown", (event) => {
-    if (event.which == 38) {
-      const current = parseInt($(".canvas .selected").css("top"));
-      $(".canvas .selected").css("top", current - 1);
-      event.preventDefault();
-      savePedalCanvas();
-    }
-  });
-
-  // Move right
-  $("body").on("keydown", ({ which }) => {
-    if (which == 39) {
-      const current = parseInt($(".canvas .selected").css("left"));
-      $(".canvas .selected").css("left", current + 1);
-      savePedalCanvas();
-    }
-  });
-
-  // Move down
-  $("body").on("keydown", (event) => {
-    if (event.which == 40) {
-      const current = parseInt($(".canvas .selected").css("top"));
-      $(".canvas .selected").css("top", current + 1);
-      event.preventDefault();
-      savePedalCanvas();
-    }
-  });
-
-  $("body").on("keydown", (event) => {
-    event.stopPropagation();
-
-    //mvital: in some cases click event is sent multiple times to the handler - no idea why
-    //mvital: seems calling stopImmediatePropagation() helps
-    event.stopImmediatePropagation();
-
-    if (event.which == 82) {
-      if ($(".canvas .selected").hasClass("rotate-90")) {
-        $(".canvas .selected").removeClass("rotate-90");
-        $(".canvas .selected").addClass("rotate-180");
-      } else if ($(".canvas .selected").hasClass("rotate-180")) {
-        $(".canvas .selected").removeClass("rotate-180");
-        $(".canvas .selected").addClass("rotate-270");
-      } else if ($(".canvas .selected").hasClass("rotate-270")) {
-        $(".canvas .selected").removeClass("rotate-270");
-      } else {
-        $(".canvas .selected").addClass("rotate-90");
+  hotkeys(
+    "[, ], shift+d, shift+del, shift+delete, shift+backspace",
+    { keyup: true },
+    (event, handler) => {
+      if (event.type === "keyup") {
+        switch (handler.key) {
+          case "shift+d":
+          case "shift+del":
+          case "shift+delete":
+          case "shift+backspace":
+            deleteSelected();
+            $(".site-body > .panel").remove();
+            break;
+          case "[":
+            $(".panel a[href='#back']").click();
+            break;
+          case "]":
+            $(".panel a[href='#front']").click();
+            break;
+        }
+        savePedalCanvas();
       }
-      savePedalCanvas();
     }
+  );
+
+  hotkeys(
+    "up, down, left, right, shift+up, shift+down, shift+left, shift+right",
+    (event, handler) => {
+      const cssArgs = (() => {
+        switch (handler.key) {
+          case "up":
+            return ["top", parseInt($(".canvas .selected").css("top")) - 1];
+          case "shift+up":
+            return ["top", parseInt($(".canvas .selected").css("top")) - 10];
+          case "down":
+            return ["top", parseInt($(".canvas .selected").css("top")) + 1];
+          case "shift+down":
+            return ["top", parseInt($(".canvas .selected").css("top")) + 10];
+          case "left":
+            return ["left", parseInt($(".canvas .selected").css("left")) - 1];
+          case "shift+left":
+            return ["left", parseInt($(".canvas .selected").css("left")) - 10];
+          case "right":
+            return ["left", parseInt($(".canvas .selected").css("left")) + 1];
+          case "shift+right":
+            return ["left", parseInt($(".canvas .selected").css("left")) + 10];
+        }
+      })();
+
+      $(".canvas .selected").css(...cssArgs);
+      savePedalCanvas();
+
+      return false;
+    }
+  );
+
+  const rotations = cycle([90, 180, 270, 0]);
+
+  hotkeys("r", (event, handler) => {
+    const selected = document.querySelectorAll(".canvas .selected")[0]
+
+    selected.className = selected.className.replace(
+      /(^|\s)rotate-\S+/g,
+      `$1rotate-${rotations.next().value}`
+    );
+    savePedalCanvas();
+
+    return false;
   });
 }); // End Document ready
+
+function* cycle(values) {
+  let iterationCount = 0;
+  let valuesLength = values.length;
+
+  while (true) {
+    yield values[iterationCount % valuesLength];
+    iterationCount++;
+  }
+}
 
 function readyCanvas(pedal) {
   const $draggable = $(".canvas .pedal, .canvas .pedalboard").draggabilly({
