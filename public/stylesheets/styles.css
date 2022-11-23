@@ -8681,7 +8681,6 @@ body {
 }
 @media (min-width: 1024px) and (prefers-color-scheme: dark) {
   .sidebar {
-    /* Dark theme styles go here */
     background-color: #282d30;
     border-right-color: rgba(255, 255, 255, 0.1);
     border: 0;
@@ -8737,7 +8736,6 @@ body {
 .item:after {
   position: absolute;
   content: " ";
-  /* background: blue; */
   left: -6px;
   right: -6px;
   bottom: -6px;
@@ -8752,56 +8750,62 @@ body {
   -ms-transform: rotate(0deg);
   -o-transform: rotate(0deg);
   transform: rotate(0deg);
-  animation-fill-mode: forwards;
+  transition: none;
 }
 .item.rotate-90 .artwork {
   -webkit-transform: rotate(90deg);
   -ms-transform: rotate(90deg);
   -o-transform: rotate(90deg);
   transform: rotate(90deg);
-  animation-fill-mode: forwards;
 }
 .item.rotate-180 .artwork {
   -webkit-transform: rotate(180deg);
   -ms-transform: rotate(180deg);
   -o-transform: rotate(180deg);
   transform: rotate(180deg);
-  animation-fill-mode: forwards;
 }
 .item.rotate-270 .artwork {
   -webkit-transform: rotate(270deg);
   -ms-transform: rotate(270deg);
   -o-transform: rotate(270deg);
   transform: rotate(270deg);
-  animation-fill-mode: forwards;
+}
+.item.rotate-360 .artwork {
+  -webkit-transform: rotate(360deg);
+  -ms-transform: rotate(360deg);
+  -o-transform: rotate(360deg);
+  transform: rotate(360deg);
 }
 .item.pedal--custom.rotate-0, .item.pedalboard--custom.rotate-0 {
   -webkit-transform: rotate(0deg);
   -ms-transform: rotate(0deg);
   -o-transform: rotate(0deg);
   transform: rotate(0deg);
-  animation-fill-mode: forwards;
+  transition: none;
 }
 .item.pedal--custom.rotate-90, .item.pedalboard--custom.rotate-90 {
   -webkit-transform: rotate(90deg);
   -ms-transform: rotate(90deg);
   -o-transform: rotate(90deg);
   transform: rotate(90deg);
-  animation-fill-mode: forwards;
 }
 .item.pedal--custom.rotate-180, .item.pedalboard--custom.rotate-180 {
   -webkit-transform: rotate(180deg);
   -ms-transform: rotate(180deg);
   -o-transform: rotate(180deg);
   transform: rotate(180deg);
-  animation-fill-mode: forwards;
 }
 .item.pedal--custom.rotate-270, .item.pedalboard--custom.rotate-270 {
   -webkit-transform: rotate(270deg);
   -ms-transform: rotate(270deg);
   -o-transform: rotate(270deg);
   transform: rotate(270deg);
-  animation-fill-mode: forwards;
+}
+.item.pedal--custom.rotate-360, .item.pedalboard--custom.rotate-360 {
+  -webkit-transform: rotate(360deg);
+  -ms-transform: rotate(360deg);
+  -o-transform: rotate(360deg);
+  transform: rotate(360deg);
 }
 .item .actions {
   z-index: 1;
@@ -8869,28 +8873,31 @@ body {
   -ms-transform: rotate(0deg);
   -o-transform: rotate(0deg);
   transform: rotate(0deg);
-  animation-fill-mode: forwards;
+  transition: none;
 }
 .pedal.rotate-90 .artwork {
   -webkit-transform: rotate(90deg);
   -ms-transform: rotate(90deg);
   -o-transform: rotate(90deg);
   transform: rotate(90deg);
-  animation-fill-mode: forwards;
 }
 .pedal.rotate-180 .artwork {
   -webkit-transform: rotate(180deg);
   -ms-transform: rotate(180deg);
   -o-transform: rotate(180deg);
   transform: rotate(180deg);
-  animation-fill-mode: forwards;
 }
 .pedal.rotate-270 .artwork {
   -webkit-transform: rotate(270deg);
   -ms-transform: rotate(270deg);
   -o-transform: rotate(270deg);
   transform: rotate(270deg);
-  animation-fill-mode: forwards;
+}
+.pedal.rotate-360 .artwork {
+  -webkit-transform: rotate(360deg);
+  -ms-transform: rotate(360deg);
+  -o-transform: rotate(360deg);
+  transform: rotate(360deg);
 }
 .pedal__box {
   border-radius: 4px;

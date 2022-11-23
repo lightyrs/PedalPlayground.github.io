@@ -117,9 +117,8 @@ $(document).ready(() => {
     const scaledHeight = $(selected).data("height") * multiplier;
     const i = $(selected).data("image");
     const pedal = commonTags.html`
-      <div id="item-${serial}" class="item pedal ${shortname} rotate-0" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
+      <div id="item-${serial}" class="item pedal ${shortname} rotate-0" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}" data-rotation="0">
         <div class="artwork" style="width:${scaledWidth}px;height:${scaledHeight}px; background-image:url(${pedalImagePath}${i})"></div>
-        <div class="shadow"></div>
         <div class="actions">
           <a class="rotate"></a>
           <a class="delete"></a>
@@ -144,7 +143,7 @@ $(document).ready(() => {
     const scaledHeight = $(selected).data("height") * multiplier;
     const i = $(selected).data("image");
     const pedal = commonTags.html`
-      <div id="item-${serial}" class="item pedalboard ${shortname} rotate-0" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
+      <div id="item-${serial}" class="item pedalboard ${shortname} rotate-0" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}" data-rotation="0">
         <div class="artwork" style="width:${scaledWidth}px;height:${scaledHeight}px; background-image:url(${pedalboardImagePath}${i})"></div>
         <div class="actions">
           <a class="rotate"></a>
@@ -176,7 +175,7 @@ $(document).ready(() => {
     const name = $("#add-custom-pedal .custom-name").val();
     const image = $("#add-custom-pedal .custom-color").val();
     const pedal = commonTags.html`
-      <div id="item-${serial}" class="item pedal pedal--custom rotate-0" style="width:${scaledWidth}px;height:${scaledHeight}px;" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
+      <div id="item-${serial}" class="item pedal pedal--custom rotate-0" style="width:${scaledWidth}px;height:${scaledHeight}px;" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}" data-rotation="0">
         <span class="pedal__box" style="background-color:${image};"></span>
         <span class="pedal__name">${name}</span>
         <span class="pedal__jack1"></span>
@@ -236,7 +235,7 @@ $(document).ready(() => {
       const pedalboard = commonTags.html`
         <div id="item-${serial}" class="item pedalboard pedalboard--custom rotate-0" style="width:${scaledWidth}px;height:${scaledHeight}px; border-width:${
         multiplier / 2
-      }px" title="Custom Pedalboard" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
+      }px" title="Custom Pedalboard" data-width="${width}" data-height="${height}" data-scale="${multiplier}" data-rotation="0">
           <div class="actions">
             <a class="delete"></a>
             <a class="rotate"></a>
@@ -307,28 +306,38 @@ $(document).ready(() => {
     }
   );
 
-  const rotations = cycle([90, 180, 270, 0]);
-
-  hotkeys("r", (event, handler) => {
-    const selected = document.querySelectorAll(".canvas .selected")[0]
-
-    selected.className = selected.className.replace(
-      /(^|\s)rotate-\S+/g,
-      `$1rotate-${rotations.next().value}`
-    );
-    savePedalCanvas();
-
-    return false;
+  hotkeys("r", { keyup: true }, (event, handler) => {
+    if (event.type === "keyup") {
+      event.stopImmediatePropagation();
+      rotateItem();
+      return false;
+    }
   });
 }); // End Document ready
 
-function* cycle(values) {
-  let iterationCount = 0;
-  let valuesLength = values.length;
+function rotateItem(target = $(".canvas .selected")) {
+  const selected = target;
+  let oldClass = null;
+  let newClass = null;
 
-  while (true) {
-    yield values[iterationCount % valuesLength];
-    iterationCount++;
+  function doRotation(oldClass, newClass, save = true) {
+    selected[0].className = selected[0].className.replace(oldClass, newClass);
+    if (save) { savePedalCanvas(); }
+  }
+
+  if (selected.hasClass("rotate-0")) {
+    doRotation("rotate-0", "rotate-90");
+  } else if (selected.hasClass("rotate-90")) {
+    doRotation("rotate-90", "rotate-180");
+  } else if (selected.hasClass("rotate-180")) {
+    doRotation("rotate-180", "rotate-270");
+  } else if (selected.hasClass("rotate-270")) {
+    doRotation("rotate-270", "rotate-360");
+  } else if (selected.hasClass("rotate-360")) {
+    doRotation("rotate-360", "rotate-0", false);
+    setTimeout(() => {
+      doRotation("rotate-0", "rotate-90");
+    }, 1);
   }
 }
 
@@ -360,18 +369,7 @@ function readyCanvas(pedal) {
       //mvital: seems calling stopImmediatePropagation() helps
       event.stopImmediatePropagation();
 
-      if ($(this).hasClass("rotate-90")) {
-        $(this).removeClass("rotate-90");
-        $(this).addClass("rotate-180");
-      } else if ($(this).hasClass("rotate-180")) {
-        $(this).removeClass("rotate-180");
-        $(this).addClass("rotate-270");
-      } else if ($(this).hasClass("rotate-270")) {
-        $(this).removeClass("rotate-270");
-      } else {
-        $(this).addClass("rotate-90");
-      }
-      savePedalCanvas();
+      rotateItem($(this));
     }
   });
 
@@ -397,22 +395,6 @@ function saveCanvasPreview() {
     .catch((error) => {
       console.error("oops, something went wrong!", error);
     });
-}
-
-function rotatePedal(pedal) {
-  ga("send", "event", "Pedal", "clicked", "rotate");
-  if ($(pedal).hasClass("rotate-90")) {
-    $(pedal).removeClass("rotate-90");
-    $(pedal).addClass("rotate-180");
-  } else if ($(pedal).hasClass("rotate-180")) {
-    $(pedal).removeClass("rotate-180");
-    $(pedal).addClass("rotate-270");
-  } else if ($(pedal).hasClass("rotate-270")) {
-    $(pedal).removeClass("rotate-270");
-  } else {
-    $(pedal).addClass("rotate-90");
-  }
-  savePedalCanvas();
 }
 
 function deletePedal(pedal) {
@@ -605,7 +587,7 @@ $("body").on("click", ".item", function (e) {
       <a href="#rotate" class="panel__action">Rotate <i>R</i></a>
       <a href="#front" class="panel__action">Move Front <i>]</i></a>
       <a href="#back" class="panel__action">Move Back <i>[</i></a>
-      <a href="#delete" class="panel__action">Delete <i>D</i></a>
+      <a href="#delete" class="panel__action">Delete <i>shift+D</i></a>
     </div>
   `;
 
