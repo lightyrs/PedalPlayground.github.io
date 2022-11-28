@@ -16,13 +16,6 @@
   version "1.8.7"
   resolved "https://codeload.github.com/harvesthq/bower-chosen/tar.gz/ad86732b668627c131e61ee8f0e6e9ed52e4db8d"
 
-"@bower_components/draggabilly@desandro/draggabilly#^2.1.1":
-  version "2.4.1"
-  resolved "https://codeload.github.com/desandro/draggabilly/tar.gz/484fc8a55422c861bd3cb3baeeca10714b433ce9"
-  dependencies:
-    get-size "^2.0.2"
-    unidragger "^2.4.0"
-
 "@bower_components/ev-emitter@metafizzy/ev-emitter#^1.0.1":
   version "1.1.1"
   resolved "https://codeload.github.com/metafizzy/ev-emitter/tar.gz/1baa3a03d8e07f665b0eb797661fcc2b0d2a5736"
@@ -55,18 +48,6 @@
   dependencies:
     almond "~0.3.1"
     jquery-mousewheel "~3.1.13"
-
-"@bower_components/unidragger@metafizzy/unidragger#^2.4.0":
-  version "2.4.0"
-  resolved "https://codeload.github.com/metafizzy/unidragger/tar.gz/297452638c879205a8cc7b08024274cd746e2302"
-  dependencies:
-    unipointer "^2.4.0"
-
-"@bower_components/unipointer@metafizzy/unipointer#^2.4.0":
-  version "2.4.0"
-  resolved "https://codeload.github.com/metafizzy/unipointer/tar.gz/19431228987919c3fbc7cf25ce65bf01d2dfff48"
-  dependencies:
-    ev-emitter "^1.0.1"
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
@@ -1257,6 +1238,11 @@ download@^7.1.0:
     p-event "^2.1.0"
     pify "^3.0.0"
 
+dragselect@^2.5.5:
+  version "2.5.5"
+  resolved "https://registry.yarnpkg.com/dragselect/-/dragselect-2.5.5.tgz#d7386c76acc8b51b29be1dc181ccfe57625031cf"
+  integrity sha512-fdyi1Uw9swNoeSl6pBjlmaOn8v1zrngLOVbRswjQ9/6808o8Fk6U/uqgKtEflaxw8iwjI0kE8L6gI2aijUO7qA==
+
 duplexer3@^0.1.4:
   version "0.1.5"
   resolved "https://registry.yarnpkg.com/duplexer3/-/duplexer3-0.1.5.tgz#0b5e4d7bad5de8901ea4440624c8e1d20099217e"
@@ -1351,11 +1337,6 @@ escape-string-regexp@^1.0.2, escape-string-regexp@^1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/escape-string-regexp/-/escape-string-regexp-1.0.5.tgz#1b61c0562190a8dff6ae3bb2cf0200ca130b86d4"
   integrity sha512-vbRorB5FUQWvla16U8R/qgaFIya2qGzwDrNmCZuYKrbdSUMG6I1ZCGQRefkRVhuOkIGVne7BQ35DSfo1qvJqFg==
-
-ev-emitter@^1.0.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/ev-emitter/-/ev-emitter-1.1.1.tgz#8f18b0ce5c76a5d18017f71c0a795c65b9138f2a"
-  integrity sha512-ipiDYhdQSCZ4hSbX4rMW+XzNKMD1prg/sTvoVmSLkuQ1MVlwjJQQA+sW8tMYR3BLUr9KjodFV4pvzunvRhd33Q==
 
 eventemitter3@^4.0.0:
   version "4.0.7"
@@ -1881,11 +1862,6 @@ get-proxy@^2.0.0:
   integrity sha512-zmZIaQTWnNQb4R4fJUEp/FC51eZsc6EkErspy3xtIYStaq8EB/hDIWipxsal+E8rz0qD7f2sL/NA9Xee4RInJw==
   dependencies:
     npm-conf "^1.1.0"
-
-get-size@^2.0.2:
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/get-size/-/get-size-2.0.3.tgz#54a1d0256b20ea7ac646516756202769941ad2ef"
-  integrity sha512-lXNzT/h/dTjTxRbm9BXb+SGxxzkm97h/PCIKtlN/CBCxxmkkIVV21udumMS93MuVTDX583gqc94v3RjuHmI+2Q==
 
 get-stream@3.0.0, get-stream@^3.0.0:
   version "3.0.0"
@@ -4994,13 +4970,6 @@ undertaker@^1.2.1:
     object.reduce "^1.0.0"
     undertaker-registry "^1.0.0"
 
-unidragger@^2.4.0:
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/unidragger/-/unidragger-2.4.0.tgz#4cd7e564317af0ef42632d5984a82d4ae6314d8d"
-  integrity sha512-MueZK2oXuGE6OAlGKIrSXK2zCq+8yb1QUZgqyTDCSJzvwYL0g2Llrad+TtoQTYxtFnNyxxSw0IMnKNIgEMia1w==
-  dependencies:
-    unipointer "^2.4.0"
-
 union-value@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/union-value/-/union-value-1.0.1.tgz#0b6fe7b835aecda61c6ea4d4f02c14221e109847"
@@ -5017,13 +4986,6 @@ union@~0.5.0:
   integrity sha512-N6uOhuW6zO95P3Mel2I2zMsbsanvvtgn6jVqJv4vbVcz/JN0OkL9suomjQGmWtxJQXOCqUJvquc1sMeNz/IwlA==
   dependencies:
     qs "^6.4.0"
-
-unipointer@^2.4.0:
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/unipointer/-/unipointer-2.4.0.tgz#ac7316aff6170ff87a4b008e55e842fb4bf13181"
-  integrity sha512-VjzDLPjGK7aYpQKH7bnDZS8X4axF5AFU/LQi+NQe1oyEHfaz6lWKhaQ7n4o7vJ1iJ4i2T0quCIfrQM139p05Sw==
-  dependencies:
-    ev-emitter "^1.0.1"
 
 unique-stream@^2.0.2:
   version "2.3.1"

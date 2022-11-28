@@ -1,6 +1,8 @@
 const pedalImagePath = "public/images/pedals/";
 const pedalboardImagePath = "public/images/pedalboards/";
 
+let ds = null;
+
 $(document).ready(() => {
   // Populate Pedalboards and Pedals lists
   GetPedalData();
@@ -12,9 +14,10 @@ $(document).ready(() => {
     width: "style",
   });
 
-  $(".pedal-list").on("select2:select", function (e) {
-    $("#add-selected-pedal").click();
-    $(this).trigger("change").focus();
+  $(".pedal-list").on("select2:select", (e) => {
+    $("#add-selected-pedal").trigger("click");
+    console.log($(this));
+    $(this).trigger("change").trigger("focus");
   });
 
   $(".pedalboard-list").select2({
@@ -23,8 +26,8 @@ $(document).ready(() => {
   });
 
   $(".pedalboard-list").on("select2:select", function (e) {
-    $("#add-selected-pedalboard").click();
-    $(this).trigger("change").focus();
+    $("#add-selected-pedalboard").trigger("click");
+    $(this).trigger("change").trigger("focus");
   });
 
   $(() => {
@@ -117,7 +120,7 @@ $(document).ready(() => {
     const scaledHeight = $(selected).data("height") * multiplier;
     const i = $(selected).data("image");
     const pedal = commonTags.html`
-      <div id="item-${serial}" class="item pedal ${shortname} rotate-0" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}" data-rotation="0">
+      <div id="item-${serial}" class="item pedal ${shortname} rotate-0" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
         <div class="artwork" style="width:${scaledWidth}px;height:${scaledHeight}px; background-image:url(${pedalImagePath}${i})"></div>
         <div class="actions">
           <a class="rotate"></a>
@@ -143,7 +146,7 @@ $(document).ready(() => {
     const scaledHeight = $(selected).data("height") * multiplier;
     const i = $(selected).data("image");
     const pedal = commonTags.html`
-      <div id="item-${serial}" class="item pedalboard ${shortname} rotate-0" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}" data-rotation="0">
+      <div id="item-${serial}" class="item pedalboard ${shortname} rotate-0" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
         <div class="artwork" style="width:${scaledWidth}px;height:${scaledHeight}px; background-image:url(${pedalboardImagePath}${i})"></div>
         <div class="actions">
           <a class="rotate"></a>
@@ -175,15 +178,17 @@ $(document).ready(() => {
     const name = $("#add-custom-pedal .custom-name").val();
     const image = $("#add-custom-pedal .custom-color").val();
     const pedal = commonTags.html`
-      <div id="item-${serial}" class="item pedal pedal--custom rotate-0" style="width:${scaledWidth}px;height:${scaledHeight}px;" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}" data-rotation="0">
-        <span class="pedal__box" style="background-color:${image};"></span>
-        <span class="pedal__name">${name}</span>
-        <span class="pedal__jack1"></span>
-        <span class="pedal__jack2"></span>
-        <span class="pedal__knob1"></span>
-        <span class="pedal__knob2"></span>
-        <span class="pedal__led"></span>
-        <span class="pedal__switch"></span>
+      <div id="item-${serial}" class="item pedal pedal--custom rotate-0" style="width:${scaledWidth}px;height:${scaledHeight}px;" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
+        <div class="artwork">
+          <span class="pedal__box" style="background-color:${image};"></span>
+          <span class="pedal__name">${name}</span>
+          <span class="pedal__jack1"></span>
+          <span class="pedal__jack2"></span>
+          <span class="pedal__knob1"></span>
+          <span class="pedal__knob2"></span>
+          <span class="pedal__led"></span>
+          <span class="pedal__switch"></span>
+        </div>
         <div class="actions">
           <a class="rotate"></a>
           <a class="delete"></a>
@@ -235,7 +240,8 @@ $(document).ready(() => {
       const pedalboard = commonTags.html`
         <div id="item-${serial}" class="item pedalboard pedalboard--custom rotate-0" style="width:${scaledWidth}px;height:${scaledHeight}px; border-width:${
         multiplier / 2
-      }px" title="Custom Pedalboard" data-width="${width}" data-height="${height}" data-scale="${multiplier}" data-rotation="0">
+      }px" title="Custom Pedalboard" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
+          <div class="artwork"></div>
           <div class="actions">
             <a class="delete"></a>
             <a class="rotate"></a>
@@ -322,7 +328,9 @@ function rotateItem(target = $(".canvas .selected")) {
 
   function doRotation(oldClass, newClass, save = true) {
     selected[0].className = selected[0].className.replace(oldClass, newClass);
-    if (save) { savePedalCanvas(); }
+    if (save) {
+      savePedalCanvas();
+    }
   }
 
   if (selected.hasClass("rotate-0")) {
@@ -342,38 +350,55 @@ function rotateItem(target = $(".canvas .selected")) {
 }
 
 function readyCanvas(pedal) {
-  const $draggable = $(".canvas .pedal, .canvas .pedalboard").draggabilly({
-    containment: ".canvas",
-  });
+  if (ds == null) {
+    ds = new DragSelect({
+      selectables: document.getElementsByClassName("item"),
+      area: document.getElementById("pp_canvas"),
+    });
 
-  $(".canvas .pedal, .canvas .pedalboard").draggabilly({
-    containment: ".canvas",
-  });
+    ds.subscribe("callback", (callback_object) => {
+      console.table(callback_object);
 
-  $draggable.on("dragEnd", (e) => {
-    console.log("dragEnd");
-    ga("send", "event", "Canvas", "moved", "dragend");
+      if (callback_object.isDragging) {
+        console.log("dragEnd");
+        ga("send", "event", "Canvas", "moved", "dragend");
+        savePedalCanvas();
+      }
+    });
+
     savePedalCanvas();
-  });
+  }
 
-  $draggable.on("staticClick", function (event) {
-    const target = $(event.target);
-    if (target.is(".delete")) {
-      deletePedal(this);
-      deselect();
-      $("body").click();
-    } else if (target.is(".rotate")) {
-      event.stopPropagation();
+  // const $draggable = $(".canvas .pedal, .canvas .pedalboard").draggabilly({
+  //   containment: ".canvas",
+  // });
 
-      //mvital: in some cases click event is sent multiple times to the handler - no idea why
-      //mvital: seems calling stopImmediatePropagation() helps
-      event.stopImmediatePropagation();
+  // $(".canvas .pedal, .canvas .pedalboard").draggabilly({
+  //   containment: ".canvas",
+  // });
 
-      rotateItem($(this));
-    }
-  });
+  // $draggable.on("dragEnd", (e) => {
+  //   console.log("dragEnd");
+  //   ga("send", "event", "Canvas", "moved", "dragend");
+  //   savePedalCanvas();
+  // });
 
-  savePedalCanvas();
+  // $draggable.on("staticClick", function (event) {
+  //   const target = $(event.target);
+  //   if (target.is(".delete")) {
+  //     deletePedal(this);
+  //     deselect();
+  //     $("body").click();
+  //   } else if (target.is(".rotate")) {
+  //     event.stopPropagation();
+
+  //     //mvital: in some cases click event is sent multiple times to the handler - no idea why
+  //     //mvital: seems calling stopImmediatePropagation() helps
+  //     event.stopImmediatePropagation();
+
+  //     rotateItem($(this));
+  //   }
+  // });
 }
 
 function savePedalCanvas() {
@@ -604,22 +629,12 @@ $("body").on("click", ".item", function (e) {
 });
 
 $("body").on("click", 'a[href="#rotate"]', function (e) {
+  e.preventDefault();
   e.stopPropagation();
   e.stopImmediatePropagation();
 
   const id = $(this).parents(".panel").data("id");
-  if ($(id).hasClass("rotate-90")) {
-    $(id).removeClass("rotate-90");
-    $(id).addClass("rotate-180");
-  } else if ($(id).hasClass("rotate-180")) {
-    $(id).removeClass("rotate-180");
-    $(id).addClass("rotate-270");
-  } else if ($(id).hasClass("rotate-270")) {
-    $(id).removeClass("rotate-270");
-  } else {
-    $(id).addClass("rotate-90");
-  }
-  savePedalCanvas();
+  rotateItem($(id));
 });
 
 $("body").on("click", 'a[href="#delete"]', function () {

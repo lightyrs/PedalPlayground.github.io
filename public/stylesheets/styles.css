@@ -8776,37 +8776,6 @@ body {
   -o-transform: rotate(360deg);
   transform: rotate(360deg);
 }
-.item.pedal--custom.rotate-0, .item.pedalboard--custom.rotate-0 {
-  -webkit-transform: rotate(0deg);
-  -ms-transform: rotate(0deg);
-  -o-transform: rotate(0deg);
-  transform: rotate(0deg);
-  transition: none;
-}
-.item.pedal--custom.rotate-90, .item.pedalboard--custom.rotate-90 {
-  -webkit-transform: rotate(90deg);
-  -ms-transform: rotate(90deg);
-  -o-transform: rotate(90deg);
-  transform: rotate(90deg);
-}
-.item.pedal--custom.rotate-180, .item.pedalboard--custom.rotate-180 {
-  -webkit-transform: rotate(180deg);
-  -ms-transform: rotate(180deg);
-  -o-transform: rotate(180deg);
-  transform: rotate(180deg);
-}
-.item.pedal--custom.rotate-270, .item.pedalboard--custom.rotate-270 {
-  -webkit-transform: rotate(270deg);
-  -ms-transform: rotate(270deg);
-  -o-transform: rotate(270deg);
-  transform: rotate(270deg);
-}
-.item.pedal--custom.rotate-360, .item.pedalboard--custom.rotate-360 {
-  -webkit-transform: rotate(360deg);
-  -ms-transform: rotate(360deg);
-  -o-transform: rotate(360deg);
-  transform: rotate(360deg);
-}
 .item .actions {
   z-index: 1;
   transition: all 0.28s;
@@ -8868,36 +8837,9 @@ body {
   min-width: 5px;
   min-height: 5px;
 }
-.pedal.rotate-0 .artwork {
-  -webkit-transform: rotate(0deg);
-  -ms-transform: rotate(0deg);
-  -o-transform: rotate(0deg);
-  transform: rotate(0deg);
-  transition: none;
-}
-.pedal.rotate-90 .artwork {
-  -webkit-transform: rotate(90deg);
-  -ms-transform: rotate(90deg);
-  -o-transform: rotate(90deg);
-  transform: rotate(90deg);
-}
-.pedal.rotate-180 .artwork {
-  -webkit-transform: rotate(180deg);
-  -ms-transform: rotate(180deg);
-  -o-transform: rotate(180deg);
-  transform: rotate(180deg);
-}
-.pedal.rotate-270 .artwork {
-  -webkit-transform: rotate(270deg);
-  -ms-transform: rotate(270deg);
-  -o-transform: rotate(270deg);
-  transform: rotate(270deg);
-}
-.pedal.rotate-360 .artwork {
-  -webkit-transform: rotate(360deg);
-  -ms-transform: rotate(360deg);
-  -o-transform: rotate(360deg);
-  transform: rotate(360deg);
+.pedal--custom .artwork {
+  width: 100%;
+  height: 100%;
 }
 .pedal__box {
   border-radius: 4px;

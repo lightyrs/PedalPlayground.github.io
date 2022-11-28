@@ -88,10 +88,10 @@ gulp.task("scripts", function () {
   return gulp
     .src([
       "node_modules/@bower_components/jquery/dist/jquery.js",
-      "node_modules/@bower_components/draggabilly/dist/draggabilly.pkgd.js",
       "node_modules/@bower_components/bootstrap-sass/assets/javascripts/bootstrap.js",
       "node_modules/@bower_components/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.js",
       "node_modules/@bower_components/select2/dist/js/select2.js",
+      "node_modules/dragselect/dist/DragSelect.js",
       "node_modules/hotkeys-js/dist/hotkeys.js",
       "node_modules/html-to-image/dist/html-to-image.js",
       "node_modules/common-tags/dist/common-tags.min.js",

@@ -313,30 +313,6 @@ body {
     }
   }
 
-  &.pedal--custom,
-  &.pedalboard--custom {
-    &.rotate-0 {
-      @include rotate(0deg);
-      transition: none;
-    }
-
-    &.rotate-90 {
-      @include rotate(90deg);
-    }
-
-    &.rotate-180 {
-      @include rotate(180deg);
-    }
-
-    &.rotate-270 {
-      @include rotate(270deg);
-    }
-
-    &.rotate-360 {
-      @include rotate(360deg);
-    }
-  }
-
   .actions {
     z-index: 1;
     transition: all 0.28s;
@@ -425,34 +401,10 @@ body {
   min-width: 5px;
   min-height: 5px;
 
-  &.rotate-0 {
+  &--custom {
     .artwork {
-      @include rotate(0deg);
-      transition: none;
-    }
-  }
-
-  &.rotate-90 {
-    .artwork {
-      @include rotate(90deg);
-    }
-  }
-
-  &.rotate-180 {
-    .artwork {
-      @include rotate(180deg);
-    }
-  }
-
-  &.rotate-270 {
-    .artwork {
-      @include rotate(270deg);
-    }
-  }
-
-  &.rotate-360 {
-    .artwork {
-      @include rotate(360deg);
+      width: 100%;
+      height: 100%;
     }
   }
 
