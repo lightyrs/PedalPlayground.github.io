@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "A site to help you arrange pedals",
   "main": "gulpfile.js",
+  "type": "commonjs",
   "dependencies": {
     "@bower_components/bootstrap-colorpicker": "itsjavi/bootstrap-colorpicker#^2.5.1",
     "@bower_components/bootstrap-sass": "twbs/bootstrap-sass#^3.3.7",
@@ -33,7 +34,8 @@
     "hotkeys-js": "^3.10.0",
     "html-to-image": "^1.10",
     "sass": "^1.56",
-    "snapback": "^0.8.0"
+    "snapback": "^0.8.0",
+    "throttle-debounce": "^5.0.0"
   },
   "devDependencies": {
     "gulp-responsive": "^3.0.1",

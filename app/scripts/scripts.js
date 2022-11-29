@@ -9,10 +9,6 @@ $(document).ready(() => {
   GetPedalData();
   GetPedalBoardData();
 
-  // $(".sidebar").on("click focus", (e) => {
-  //   deselect();
-  // });
-
   // Make lists searchable
   $(".pedal-list").select2({
     placeholder: "Select a pedal",
@@ -38,7 +34,7 @@ $(document).ready(() => {
   $(() => {
     // Load canvas from localStorage if it has been saved prior
     if (localStorage["pedalCanvas"] != null) {
-      $("#pp_canvas").html(JSON.parse(localStorage["pedalCanvas"]));
+      $("#pp_canvas").html(JSON.parse(localStorage["pedalCanvas"]).replaceAll(/ds\-(?:selected|hover)/g, ""));
       readyCanvas();
     } else {
       readyCanvas();
@@ -55,6 +51,8 @@ $(document).ready(() => {
     // Set canvas scale input and bg size to match scale
     $("#canvas-scale").val(multiplier);
     $("#pp_canvas").css("background-size", `${multiplier}px`);
+
+    historyBuffer.enable();
   });
 
   // When user changes scale, update stuffs
@@ -262,6 +260,20 @@ $(document).ready(() => {
     }
   });
 
+  hotkeys("shift+u, shift+r", { keyup: true}, (event, handler) => {
+    if (event.type == "keyup") {
+      switch (handler.key) {
+        case "shift+u":
+          historyBuffer.undo();
+          break;
+        case "shift+r":
+          historyBuffer.redo();
+          break;
+      }
+      savePedalCanvas();
+    }
+  });
+
   hotkeys(
     "[, ], shift+d, shift+del, shift+delete, shift+backspace",
     { keyup: true },
@@ -335,7 +347,6 @@ function readyCanvas() {
         childList: true,
       }
     });
-    historyBuffer.enable();
   }
 
   if (ds == null) {
@@ -349,8 +360,6 @@ function readyCanvas() {
     });
 
     ds.subscribe("callback", (callback_object) => {
-      console.table(callback_object);
-
       if (callback_object.isDragging) {
         if (callback_object.event.target.className == "delete") {
           deletePedal($(callback_object.event.target).parents(".item")[0]);
@@ -358,17 +367,19 @@ function readyCanvas() {
         } else if (callback_object.event.target.className == "rotate") {
           rotateItem($(callback_object.event.target).parents(".item"));
           callback_object.event.preventDefault();
+        } else {
+          let initialCords = ds.getInitialCursorPositionArea();
+          let currentCords = ds.getPreviousCursorPositionArea();
+          if (["x", "y"].some((key) => initialCords[key] != currentCords[key])) {
+            console.log("dragEnd");
+            ga("send", "event", "Canvas", "moved", "dragend");
+            savePedalCanvas();
+          }
         }
       }
     });
 
-    ds.subscribe("dragmove", (callback_object) => {
-      if (callback_object.isDragging) {
-        console.log("dragEnd");
-        ga("send", "event", "Canvas", "moved", "dragend");
-        savePedalCanvas();
-      }
-    });
+    ds.clearSelection();
 
     savePedalCanvas();
   }
@@ -429,7 +440,7 @@ window.GetPedalData = () => {
     dataType: "text",
     type: "GET",
     success(data) {
-      data = $.parseJSON(data.replace(/\r\n/g, "").replace(/\t/g, ""));
+      data = JSON.parse(data.replace(/\r\n/g, "").replace(/\t/g, ""));
       const pedals = [];
       for (const pedal in data) {
         pedals.push(
@@ -462,7 +473,6 @@ window.RenderPedals = (pedals) => {
   const { Type, Brand, Name, Width, Height, Image } = pedals;
   const option = $("<option>", {
     text: `${Brand} ${Name}`,
-    // id: `${Name.toLowerCase().replace(/(\s+)|(['"])/g, (m, p1, p2) => p1 ? "-" : "")}`,
     data: {
       width: Width,
       height: Height,
@@ -493,7 +503,7 @@ window.GetPedalBoardData = () => {
     dataType: "text",
     type: "GET",
     success(data) {
-      data = $.parseJSON(data.replace(/\r\n/g, "").replace(/\t/g, ""));
+      data = JSON.parse(data.replace(/\r\n/g, "").replace(/\t/g, ""));
       const pedalboards = [];
       for (const pedalboard in data) {
         pedalboards.push(
@@ -593,8 +603,6 @@ $("body").on("click", ".item", function (e) {
   // reset stuff
   $(".panel").remove();
 
-  // add stuff
-  // ds.addSelection(pedal);
   $("#pp_canvas").after(markup);
 
   // Prevent bubble up to .canvas
