@@ -258,7 +258,7 @@ body {
     background-repeat: no-repeat;
     background-position: center;
     background-size: 100% 100%;
-    z-index: 1;
+    z-index: 1 !important;
     position: relative;
     transition: all 0.4s;
     // Drop shadow that matches the background image!
@@ -314,7 +314,7 @@ body {
   }
 
   .actions {
-    z-index: 1;
+    z-index: 1 !important;
     transition: all 0.28s;
     opacity: 0;
     background: white;
@@ -376,7 +376,7 @@ body {
   }
 
   // Selected state
-  &.selected {
+  &.ds-selected {
     .artwork {
       $same: 0px 0px 5px rgba(blue, 0.5);
       //-webkit-filter: drop-shadow( $same );
@@ -397,7 +397,7 @@ body {
 }
 
 .pedal {
-  z-index: 1;
+  z-index: 1 !important;
   min-width: 5px;
   min-height: 5px;
 
@@ -465,7 +465,7 @@ body {
 }
 
 .pedalboard {
-  z-index: 1;
+  z-index: 1 !important;
 
   &--custom {
     border: 5px solid #ddd;

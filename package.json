@@ -32,7 +32,8 @@
     "gulp-watch": "^5.0.1",
     "hotkeys-js": "^3.10.0",
     "html-to-image": "^1.10",
-    "sass": "^1.56"
+    "sass": "^1.56",
+    "snapback": "^0.8.0"
   },
   "devDependencies": {
     "gulp-responsive": "^3.0.1",

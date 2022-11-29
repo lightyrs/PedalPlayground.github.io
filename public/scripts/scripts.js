@@ -24211,15 +24211,152 @@ S2.define('jquery.select2',[
 
 !function(n,r){"object"==typeof exports&&"undefined"!=typeof module?r(exports):"function"==typeof define&&define.amd?define(["exports"],r):r(n.commonTags=n.commonTags||{})}(this,function(n){"use strict";var r,t,o=function(){function e(n,r){for(var t=0;t<r.length;t++){var e=r[t];e.enumerable=e.enumerable||!1,e.configurable=!0,"value"in e&&(e.writable=!0),Object.defineProperty(n,e.key,e)}}return function(n,r,t){return r&&e(n.prototype,r),t&&e(n,t),n}}(),i=(r=["",""],t=["",""],Object.freeze(Object.defineProperties(r,{raw:{value:Object.freeze(t)}})));var e=function(){function e(){for(var o=this,n=arguments.length,r=Array(n),t=0;t<n;t++)r[t]=arguments[t];return function(n,r){if(!(n instanceof r))throw new TypeError("Cannot call a class as a function")}(this,e),this.tag=function(n){for(var r=arguments.length,t=Array(1<r?r-1:0),e=1;e<r;e++)t[e-1]=arguments[e];return"function"==typeof n?o.interimTag.bind(o,n):"string"==typeof n?o.transformEndResult(n):(n=n.map(o.transformString.bind(o)),o.transformEndResult(n.reduce(o.processSubstitutions.bind(o,t))))},0<r.length&&Array.isArray(r[0])&&(r=r[0]),this.transformers=r.map(function(n){return"function"==typeof n?n():n}),this.tag}return o(e,[{key:"interimTag",value:function(n,r){for(var t=arguments.length,e=Array(2<t?t-2:0),o=2;o<t;o++)e[o-2]=arguments[o];return this.tag(i,n.apply(void 0,[r].concat(e)))}},{key:"processSubstitutions",value:function(n,r,t){var e=this.transformSubstitution(n.shift(),r);return"".concat(r,e,t)}},{key:"transformString",value:function(n){return this.transformers.reduce(function(n,r){return r.onString?r.onString(n):n},n)}},{key:"transformSubstitution",value:function(n,t){return this.transformers.reduce(function(n,r){return r.onSubstitution?r.onSubstitution(n,t):n},n)}},{key:"transformEndResult",value:function(n){return this.transformers.reduce(function(n,r){return r.onEndResult?r.onEndResult(n):n},n)}}]),e}(),u=function(){var r=0<arguments.length&&void 0!==arguments[0]?arguments[0]:"";return{onEndResult:function(n){if(""===r)return n.trim();if("start"===(r=r.toLowerCase())||"left"===r)return n.replace(/^\s*/,"");if("end"===r||"right"===r)return n.replace(/\s*$/,"");throw new Error("Side not supported: "+r)}}};var a=function(){var o=0<arguments.length&&void 0!==arguments[0]?arguments[0]:"initial";return{onEndResult:function(n){if("initial"===o){var r=n.match(/^[^\S\n]*(?=\S)/gm),t=r&&Math.min.apply(Math,function(n){if(Array.isArray(n)){for(var r=0,t=Array(n.length);r<n.length;r++)t[r]=n[r];return t}return Array.from(n)}(r.map(function(n){return n.length})));if(t){var e=new RegExp("^.{"+t+"}","gm");return n.replace(e,"")}return n}if("all"===o)return n.replace(/^[^\S\n]+/gm,"");throw new Error("Unknown type: "+o)}}},s=function(r,t){return{onEndResult:function(n){if(null==r||null==t)throw new Error("replaceResultTransformer requires at least 2 arguments.");return n.replace(r,t)}}},f=function(t,e){return{onSubstitution:function(n,r){if(null==t||null==e)throw new Error("replaceSubstitutionTransformer requires at least 2 arguments.");return null==n?n:n.toString().replace(t,e)}}},c={separator:"",conjunction:"",serial:!1},l=function(){var s=0<arguments.length&&void 0!==arguments[0]?arguments[0]:c;return{onSubstitution:function(n,r){if(Array.isArray(n)){var t=n.length,e=s.separator,o=s.conjunction,i=s.serial,u=r.match(/(\n?[^\S\n]+)$/);if(n=u?n.join(e+u[1]):n.join(e+" "),o&&1<t){var a=n.lastIndexOf(e);n=n.slice(0,a)+(i?e:"")+" "+o+n.slice(a+1)}}return n}}},m=function(t){return{onSubstitution:function(n,r){if(null==t||"string"!=typeof t)throw new Error("You need to specify a string character to split by.");return"string"==typeof n&&n.includes(t)&&(n=n.split(t)),n}}},p=function(n){return null!=n&&!Number.isNaN(n)&&"boolean"!=typeof n},g=function(){return{onSubstitution:function(n){return Array.isArray(n)?n.filter(p):p(n)?n:""}}},d=new e(l({separator:","}),a,u),h=new e(l({separator:",",conjunction:"and"}),a,u),y=new e(l({separator:",",conjunction:"or"}),a,u),w=new e(m("\n"),g,l,a,u),v=new e(m("\n"),l,a,u,f(/&/g,"&amp;"),f(/</g,"&lt;"),f(/>/g,"&gt;"),f(/"/g,"&quot;"),f(/'/g,"&#x27;"),f(/`/g,"&#x60;")),b=new e(s(/(?:\n(?:\s*))+/g," "),u),S=new e(s(/(?:\n\s*)/g,""),u),T=new e(l({separator:","}),s(/(?:\s+)/g," "),u),A=new e(l({separator:",",conjunction:"or"}),s(/(?:\s+)/g," "),u),E=new e(l({separator:",",conjunction:"and"}),s(/(?:\s+)/g," "),u),L=new e(l,a,u),j=new e(l,s(/(?:\s+)/g," "),u),R=new e(a,u),k=new e(a("all"),u);n.TemplateTag=e,n.trimResultTransformer=u,n.stripIndentTransformer=a,n.replaceResultTransformer=s,n.replaceSubstitutionTransformer=f,n.replaceStringTransformer=function(r,t){return{onString:function(n){if(null==r||null==t)throw new Error("replaceStringTransformer requires at least 2 arguments.");return n.replace(r,t)}}},n.inlineArrayTransformer=l,n.splitStringTransformer=m,n.removeNonPrintingValuesTransformer=g,n.commaLists=d,n.commaListsAnd=h,n.commaListsOr=y,n.html=w,n.codeBlock=w,n.source=w,n.safeHtml=v,n.oneLine=b,n.oneLineTrim=S,n.oneLineCommaLists=T,n.oneLineCommaListsOr=A,n.oneLineCommaListsAnd=E,n.inlineLists=L,n.oneLineInlineLists=j,n.stripIndent=R,n.stripIndents=k,Object.defineProperty(n,"__esModule",{value:!0})});
 
+!(function (t, e) {
+  "object" == typeof exports && "undefined" != typeof module
+    ? (module.exports = e())
+    : "function" == typeof define && define.amd
+    ? define(e)
+    : (t.snapback = e());
+})(this, function () {
+  "use strict";
+  var t = function (t, e) {
+    var i = this,
+      n =
+        "undefined" != typeof MutationObserver
+          ? MutationObserver
+          : "undefined" != typeof WebKitMutationObserver
+          ? WebKitMutationObserver
+          : void 0;
+    n &&
+      ((this.register = this.register.bind(this)),
+      (this.addMutation = this.addMutation.bind(this)),
+      Object.assign(
+        this,
+        {
+          observe: {
+            subtree: !0,
+            attributes: !0,
+            attributeOldValue: !0,
+            childList: !0,
+            characterData: !0,
+            characterDataOldValue: !0,
+          },
+          element: t,
+          timeout: 0,
+          undos: [],
+          mutations: [],
+          undoIndex: -1,
+        },
+        e
+      ),
+      (this.observer = new n(function (t) {
+        t.forEach(i.addMutation);
+      })));
+  };
+  return (
+    (t.prototype = {
+      addMutation: function (t) {
+        switch (
+          (this.timeout &&
+            (clearTimeout(this._timeout),
+            (this._timeout = setTimeout(this.register, this.timeout))),
+          t.type)
+        ) {
+          case "characterData":
+            t.newValue = t.target.textContent;
+            var e = this.mutations[this.mutations.length - 1];
+            if (
+              e &&
+              "characterData" === e.type &&
+              e.target === t.target &&
+              e.newValue === t.oldValue
+            )
+              return void (e.newValue = t.newValue);
+            break;
+          case "attributes":
+            t.newValue = t.target.getAttribute(t.attributeName);
+        }
+        this.mutations.push(t);
+      },
+      disable: function () {
+        this.enabled && (this.observer.disconnect(), (this.enabled = !1));
+      },
+      enable: function () {
+        this.enabled || (this.observer.observe(this.element, this.observe), (this.enabled = !0));
+      },
+      register: function () {
+        0 < this.mutations.length &&
+          (this.undoIndex < this.undos.length - 1 &&
+            (this.undos = this.undos.slice(0, this.undoIndex + 1)),
+          this.undos.push({
+            data:
+              this.store instanceof Function ? { before: this.data, after: this.store() } : void 0,
+            mutations: this.mutations,
+          }),
+          (this.mutations = []),
+          (this.undoIndex = this.undos.length - 1));
+      },
+      redo: function () {
+        this.enabled &&
+          this.undoIndex < this.undos.length - 1 &&
+          this.undoRedo(this.undos[++this.undoIndex], !1);
+      },
+      undo: function () {
+        this.register(),
+          this.enabled && 0 <= this.undoIndex && this.undoRedo(this.undos[this.undoIndex--], !0);
+      },
+      undoRedo: function (t, s) {
+        this.disable(),
+          (s ? t.mutations.slice(0).reverse() : t.mutations).forEach(function (e) {
+            switch (e.type) {
+              case "characterData":
+                e.target.textContent = s ? e.oldValue : e.newValue;
+                break;
+              case "attributes":
+                var t = s ? e.oldValue : e.newValue;
+                t || !1 === t || 0 === t
+                  ? e.target.setAttribute(e.attributeName, t)
+                  : e.target.removeAttribute(e.attributeName);
+                break;
+              case "childList":
+                var i = s ? e.removedNodes : e.addedNodes,
+                  n = s ? e.addedNodes : e.removedNodes;
+                Array.from(i).forEach(
+                  e.nextSibling
+                    ? function (t) {
+                        e.nextSibling.parentNode.insertBefore(t, e.nextSibling);
+                      }
+                    : function (t) {
+                        e.target.appendChild(t);
+                      }
+                ),
+                  Array.from(n).forEach(function (t) {
+                    t.parentNode.removeChild(t);
+                  });
+            }
+          }),
+          this.restore instanceof Function && this.restore(s ? t.data.before : t.data.after),
+          this.enable();
+      },
+    }),
+    t
+  );
+});
+
 const pedalImagePath = "public/images/pedals/";
 const pedalboardImagePath = "public/images/pedalboards/";
 
 let ds = null;
+let historyBuffer = null;
 
 $(document).ready(() => {
   // Populate Pedalboards and Pedals lists
   GetPedalData();
   GetPedalBoardData();
+
+  // $(".sidebar").on("click focus", (e) => {
+  //   deselect();
+  // });
 
   // Make lists searchable
   $(".pedal-list").select2({
@@ -24246,14 +24383,15 @@ $(document).ready(() => {
   $(() => {
     // Load canvas from localStorage if it has been saved prior
     if (localStorage["pedalCanvas"] != null) {
-      const savedPedalCanvas = JSON.parse(localStorage["pedalCanvas"]);
-      $(".canvas").html(savedPedalCanvas);
+      $("#pp_canvas").html(JSON.parse(localStorage["pedalCanvas"]));
+      readyCanvas();
+    } else {
       readyCanvas();
     }
 
     // If hidden multiplier value doesn't exist, create it
     if ($("#multiplier").length == 0) {
-      $(".canvas").append('<input id="multiplier" type="hidden" value="25">');
+      $("#pp_canvas").append('<input id="multiplier" type="hidden" value="25">');
       var multiplier = 25;
       // If hidden multiplier value does exist set variable
     } else {
@@ -24261,7 +24399,7 @@ $(document).ready(() => {
     }
     // Set canvas scale input and bg size to match scale
     $("#canvas-scale").val(multiplier);
-    $(".canvas").css("background-size", `${multiplier}px`);
+    $("#pp_canvas").css("background-size", `${multiplier}px`);
   });
 
   // When user changes scale, update stuffs
@@ -24271,7 +24409,7 @@ $(document).ready(() => {
     $("#multiplier").val(multiplier);
 
     // Update scale of bg image
-    $(".canvas").css("background-size", `${multiplier}px`);
+    $("#pp_canvas").css("background-size", `${multiplier}px`);
 
     // Update all items with stored scale
     document.querySelectorAll(".item").forEach((element) => {
@@ -24316,7 +24454,7 @@ $(document).ready(() => {
   });
 
   $("body").on("click", "#clear-canvas-confirmation", () => {
-    $(".canvas").empty();
+    $("#pp_canvas").empty();
     $("#clear-canvas-modal").modal("hide");
     savePedalCanvas();
   });
@@ -24333,7 +24471,7 @@ $(document).ready(() => {
     const scaledHeight = $(selected).data("height") * multiplier;
     const i = $(selected).data("image");
     const pedal = commonTags.html`
-      <div id="item-${serial}" class="item pedal ${shortname} rotate-0" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
+      <div id="item-${serial}" class="item pedal ${shortname} rotate-0 ds-selectable" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
         <div class="artwork" style="width:${scaledWidth}px;height:${scaledHeight}px; background-image:url(${pedalImagePath}${i})"></div>
         <div class="actions">
           <a class="rotate"></a>
@@ -24341,8 +24479,9 @@ $(document).ready(() => {
         </div>
       </div>
     `;
-    $(".canvas").append(pedal);
-    readyCanvas();
+    $("#pp_canvas").append(pedal);
+    ds.setSelection(document.getElementById(`item-${serial}`));
+
     ga("send", "event", "Pedal", "added", name);
     event.preventDefault();
   });
@@ -24359,7 +24498,7 @@ $(document).ready(() => {
     const scaledHeight = $(selected).data("height") * multiplier;
     const i = $(selected).data("image");
     const pedal = commonTags.html`
-      <div id="item-${serial}" class="item pedalboard ${shortname} rotate-0" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
+      <div id="item-${serial}" class="item pedalboard ${shortname} rotate-0 ds-selectable" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
         <div class="artwork" style="width:${scaledWidth}px;height:${scaledHeight}px; background-image:url(${pedalboardImagePath}${i})"></div>
         <div class="actions">
           <a class="rotate"></a>
@@ -24368,8 +24507,9 @@ $(document).ready(() => {
       </div>
     `;
 
-    $(".canvas").prepend(pedal);
-    readyCanvas();
+    $("#pp_canvas").prepend(pedal);
+    ds.setSelection(document.getElementById(`item-${serial}`));
+
     ga("send", "event", "Pedalboard", "added", name);
     event.preventDefault();
   });
@@ -24391,7 +24531,7 @@ $(document).ready(() => {
     const name = $("#add-custom-pedal .custom-name").val();
     const image = $("#add-custom-pedal .custom-color").val();
     const pedal = commonTags.html`
-      <div id="item-${serial}" class="item pedal pedal--custom rotate-0" style="width:${scaledWidth}px;height:${scaledHeight}px;" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
+      <div id="item-${serial}" class="item pedal pedal--custom rotate-0 ds-selectable" style="width:${scaledWidth}px;height:${scaledHeight}px;" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
         <div class="artwork">
           <span class="pedal__box" style="background-color:${image};"></span>
           <span class="pedal__name">${name}</span>
@@ -24420,8 +24560,9 @@ $(document).ready(() => {
       $("#add-custom-pedal .custom-height").addClass("invalid").focus();
     } else {
       console.log("add custom pedal...");
-      $(".canvas").append(pedal);
-      readyCanvas();
+      $("#pp_canvas").append(pedal);
+      ds.setSelection(document.getElementById(`item-${serial}`));
+
       ga("send", "event", "CustomPedal", "added", `${dims} ${name}`);
       event.preventDefault();
     }
@@ -24439,9 +24580,7 @@ $(document).ready(() => {
     $("#add-custom-pedalboard .invalid").removeClass("invalid");
 
     if (width == "" || height == "") {
-      $("#add-custom-pedalboard .custom-height, #add-custom-pedalboard .custom-width").addClass(
-        "invalid"
-      );
+      $("#add-custom-pedalboard .custom-height, #add-custom-pedalboard .custom-width").addClass("invalid");
       $("#add-custom-pedalboard .custom-width").focus();
     } else if (width == "") {
       $("#add-custom-pedalboard .custom-width").addClass("invalid").focus();
@@ -24451,9 +24590,7 @@ $(document).ready(() => {
       console.log("add custom pedalboard...");
       const dims = `${width}" x ${height}"`;
       const pedalboard = commonTags.html`
-        <div id="item-${serial}" class="item pedalboard pedalboard--custom rotate-0" style="width:${scaledWidth}px;height:${scaledHeight}px; border-width:${
-        multiplier / 2
-      }px" title="Custom Pedalboard" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
+        <div id="item-${serial}" class="item pedalboard pedalboard--custom rotate-0 ds-selectable" style="width:${scaledWidth}px;height:${scaledHeight}px; border-width:${multiplier / 2}px" title="Custom Pedalboard" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
           <div class="artwork"></div>
           <div class="actions">
             <a class="delete"></a>
@@ -24462,8 +24599,9 @@ $(document).ready(() => {
         </div>
       `;
 
-      $(".canvas").prepend(pedalboard);
-      readyCanvas();
+      $("#pp_canvas").prepend(pedalboard);
+      ds.setSelection(document.getElementById(`item-${serial}`));
+
       ga("send", "event", "CustomPedalboard", "added", `${dims} ${name}`);
       event.preventDefault();
     }
@@ -24494,37 +24632,6 @@ $(document).ready(() => {
     }
   );
 
-  hotkeys(
-    "up, down, left, right, shift+up, shift+down, shift+left, shift+right",
-    (event, handler) => {
-      const cssArgs = (() => {
-        switch (handler.key) {
-          case "up":
-            return ["top", parseInt($(".canvas .selected").css("top")) - 1];
-          case "shift+up":
-            return ["top", parseInt($(".canvas .selected").css("top")) - 10];
-          case "down":
-            return ["top", parseInt($(".canvas .selected").css("top")) + 1];
-          case "shift+down":
-            return ["top", parseInt($(".canvas .selected").css("top")) + 10];
-          case "left":
-            return ["left", parseInt($(".canvas .selected").css("left")) - 1];
-          case "shift+left":
-            return ["left", parseInt($(".canvas .selected").css("left")) - 10];
-          case "right":
-            return ["left", parseInt($(".canvas .selected").css("left")) + 1];
-          case "shift+right":
-            return ["left", parseInt($(".canvas .selected").css("left")) + 10];
-        }
-      })();
-
-      $(".canvas .selected").css(...cssArgs);
-      savePedalCanvas();
-
-      return false;
-    }
-  );
-
   hotkeys("r", { keyup: true }, (event, handler) => {
     if (event.type === "keyup") {
       event.stopImmediatePropagation();
@@ -24534,44 +24641,71 @@ $(document).ready(() => {
   });
 }); // End Document ready
 
-function rotateItem(target = $(".canvas .selected")) {
-  const selected = target;
-  let oldClass = null;
-  let newClass = null;
+function rotateItem(targets = $("#pp_canvas .ds-selected")) {
+  targets.each((i, selected) => {
+    let oldClass = null;
+    let newClass = null;
 
-  function doRotation(oldClass, newClass, save = true) {
-    selected[0].className = selected[0].className.replace(oldClass, newClass);
-    if (save) {
-      savePedalCanvas();
+    function doRotation(oldClass, newClass, save = true) {
+      selected.className = selected.className.replace(oldClass, newClass);
+      if (save) {
+        savePedalCanvas();
+      }
     }
-  }
 
-  if (selected.hasClass("rotate-0")) {
-    doRotation("rotate-0", "rotate-90");
-  } else if (selected.hasClass("rotate-90")) {
-    doRotation("rotate-90", "rotate-180");
-  } else if (selected.hasClass("rotate-180")) {
-    doRotation("rotate-180", "rotate-270");
-  } else if (selected.hasClass("rotate-270")) {
-    doRotation("rotate-270", "rotate-360");
-  } else if (selected.hasClass("rotate-360")) {
-    doRotation("rotate-360", "rotate-0", false);
-    setTimeout(() => {
+    if (selected.className.match("rotate-0") != null) {
       doRotation("rotate-0", "rotate-90");
-    }, 1);
-  }
+    } else if (selected.className.match("rotate-90") != null) {
+      doRotation("rotate-90", "rotate-180");
+    } else if (selected.className.match("rotate-180") != null) {
+      doRotation("rotate-180", "rotate-270");
+    } else if (selected.className.match("rotate-270") != null) {
+      doRotation("rotate-270", "rotate-360");
+    } else if (selected.className.match("rotate-360") != null) {
+      doRotation("rotate-360", "rotate-0", false);
+      setTimeout(() => {
+        doRotation("rotate-0", "rotate-90");
+      }, 1);
+    }
+  });
 }
 
-function readyCanvas(pedal) {
+function readyCanvas() {
+  if (historyBuffer == null) {
+    historyBuffer = new snapback(document.getElementById("pp_canvas"), {
+      observe: {
+        subtree: true,
+        attributes: true,
+        attributeOldValue: true,
+        childList: true,
+      }
+    });
+    historyBuffer.enable();
+  }
+
   if (ds == null) {
     ds = new DragSelect({
       selectables: document.getElementsByClassName("item"),
       area: document.getElementById("pp_canvas"),
+      multiSelectKeys: ["shift"],
+      autoScrollSpeed: 0.00001,
+      overflowTolerance: { x: 0, y: 0 },
+      keyboardDragSpeed: 1,
     });
 
     ds.subscribe("callback", (callback_object) => {
       console.table(callback_object);
 
+      if (callback_object.isDragging) {
+        if (callback_object.event.target.className == "delete") {
+          deletePedal($(callback_object.event.target).parents(".item")[0]);
+        } else if (callback_object.event.target.className == "rotate") {
+          rotateItem($(callback_object.event.target).parents(".item"));
+        }
+      }
+    });
+
+    ds.subscribe("dragmove", (callback_object) => {
       if (callback_object.isDragging) {
         console.log("dragEnd");
         ga("send", "event", "Canvas", "moved", "dragend");
@@ -24581,46 +24715,16 @@ function readyCanvas(pedal) {
 
     savePedalCanvas();
   }
-
-  // const $draggable = $(".canvas .pedal, .canvas .pedalboard").draggabilly({
-  //   containment: ".canvas",
-  // });
-
-  // $(".canvas .pedal, .canvas .pedalboard").draggabilly({
-  //   containment: ".canvas",
-  // });
-
-  // $draggable.on("dragEnd", (e) => {
-  //   console.log("dragEnd");
-  //   ga("send", "event", "Canvas", "moved", "dragend");
-  //   savePedalCanvas();
-  // });
-
-  // $draggable.on("staticClick", function (event) {
-  //   const target = $(event.target);
-  //   if (target.is(".delete")) {
-  //     deletePedal(this);
-  //     deselect();
-  //     $("body").click();
-  //   } else if (target.is(".rotate")) {
-  //     event.stopPropagation();
-
-  //     //mvital: in some cases click event is sent multiple times to the handler - no idea why
-  //     //mvital: seems calling stopImmediatePropagation() helps
-  //     event.stopImmediatePropagation();
-
-  //     rotateItem($(this));
-  //   }
-  // });
 }
 
 function savePedalCanvas() {
   console.log("Canvas Saved!");
-  localStorage["pedalCanvas"] = JSON.stringify($(".canvas").html());
+  localStorage["pedalCanvas"] = JSON.stringify($("#pp_canvas").html());
+  historyBuffer.register();
 }
 
 function saveCanvasPreview() {
-  const node = $(".canvas")[0];
+  const node = $("#pp_canvas")[0];
 
   htmlToImage
     .toPng(node)
@@ -24642,14 +24746,14 @@ function deletePedal(pedal) {
 }
 
 function deselect() {
-  $(".canvas .panel").remove();
-  $(".canvas .selected").removeClass("selected");
+  $("#pp_canvas .panel").remove();
+  ds.clearSelection();
   savePedalCanvas();
 }
 
 function deleteSelected() {
-  $(".canvas .selected").remove();
-  $(".canvas .panel").remove();
+  $("#pp_canvas .ds-selected").remove();
+  $("#pp_canvas .panel").remove();
   savePedalCanvas();
 }
 
@@ -24831,11 +24935,10 @@ $("body").on("click", ".item", function (e) {
 
   // reset stuff
   $(".panel").remove();
-  $(".canvas .selected").removeClass("selected");
 
   // add stuff
-  $(pedal).addClass("selected");
-  $(".canvas").after(markup);
+  // ds.addSelection(pedal);
+  $("#pp_canvas").after(markup);
 
   // Prevent bubble up to .canvas
   e.stopPropagation();
@@ -24876,5 +24979,4 @@ $("body").on("click", 'a[href="#back"]', function (e) {
 $("body").click(() => {
   // reset stuff
   $(".panel").remove();
-  $(".canvas .selected").removeClass("selected");
 });
