@@ -24699,8 +24699,10 @@ function readyCanvas() {
       if (callback_object.isDragging) {
         if (callback_object.event.target.className == "delete") {
           deletePedal($(callback_object.event.target).parents(".item")[0]);
+          callback_object.event.preventDefault();
         } else if (callback_object.event.target.className == "rotate") {
           rotateItem($(callback_object.event.target).parents(".item"));
+          callback_object.event.preventDefault();
         }
       }
     });
