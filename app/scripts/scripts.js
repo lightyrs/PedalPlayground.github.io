@@ -385,11 +385,11 @@ function readyCanvas() {
   }
 }
 
-function savePedalCanvas() {
+const savePedalCanvas = throttleDebounce.debounce(400, () => {
   console.log("Canvas Saved!");
   localStorage["pedalCanvas"] = JSON.stringify($("#pp_canvas").html());
   historyBuffer.register();
-}
+})
 
 function saveCanvasPreview() {
   const node = $("#pp_canvas")[0];

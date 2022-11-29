@@ -95,6 +95,7 @@ gulp.task("scripts", function () {
       "node_modules/hotkeys-js/dist/hotkeys.js",
       "node_modules/html-to-image/dist/html-to-image.js",
       "node_modules/common-tags/dist/common-tags.min.js",
+      "node_modules/throttle-debounce/umd/index.js",
       "app/scripts/vendor/snapback.js",
       "app/scripts/scripts.js",
     ])

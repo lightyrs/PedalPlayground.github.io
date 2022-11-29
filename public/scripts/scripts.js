@@ -24211,6 +24211,190 @@ S2.define('jquery.select2',[
 
 !function(n,r){"object"==typeof exports&&"undefined"!=typeof module?r(exports):"function"==typeof define&&define.amd?define(["exports"],r):r(n.commonTags=n.commonTags||{})}(this,function(n){"use strict";var r,t,o=function(){function e(n,r){for(var t=0;t<r.length;t++){var e=r[t];e.enumerable=e.enumerable||!1,e.configurable=!0,"value"in e&&(e.writable=!0),Object.defineProperty(n,e.key,e)}}return function(n,r,t){return r&&e(n.prototype,r),t&&e(n,t),n}}(),i=(r=["",""],t=["",""],Object.freeze(Object.defineProperties(r,{raw:{value:Object.freeze(t)}})));var e=function(){function e(){for(var o=this,n=arguments.length,r=Array(n),t=0;t<n;t++)r[t]=arguments[t];return function(n,r){if(!(n instanceof r))throw new TypeError("Cannot call a class as a function")}(this,e),this.tag=function(n){for(var r=arguments.length,t=Array(1<r?r-1:0),e=1;e<r;e++)t[e-1]=arguments[e];return"function"==typeof n?o.interimTag.bind(o,n):"string"==typeof n?o.transformEndResult(n):(n=n.map(o.transformString.bind(o)),o.transformEndResult(n.reduce(o.processSubstitutions.bind(o,t))))},0<r.length&&Array.isArray(r[0])&&(r=r[0]),this.transformers=r.map(function(n){return"function"==typeof n?n():n}),this.tag}return o(e,[{key:"interimTag",value:function(n,r){for(var t=arguments.length,e=Array(2<t?t-2:0),o=2;o<t;o++)e[o-2]=arguments[o];return this.tag(i,n.apply(void 0,[r].concat(e)))}},{key:"processSubstitutions",value:function(n,r,t){var e=this.transformSubstitution(n.shift(),r);return"".concat(r,e,t)}},{key:"transformString",value:function(n){return this.transformers.reduce(function(n,r){return r.onString?r.onString(n):n},n)}},{key:"transformSubstitution",value:function(n,t){return this.transformers.reduce(function(n,r){return r.onSubstitution?r.onSubstitution(n,t):n},n)}},{key:"transformEndResult",value:function(n){return this.transformers.reduce(function(n,r){return r.onEndResult?r.onEndResult(n):n},n)}}]),e}(),u=function(){var r=0<arguments.length&&void 0!==arguments[0]?arguments[0]:"";return{onEndResult:function(n){if(""===r)return n.trim();if("start"===(r=r.toLowerCase())||"left"===r)return n.replace(/^\s*/,"");if("end"===r||"right"===r)return n.replace(/\s*$/,"");throw new Error("Side not supported: "+r)}}};var a=function(){var o=0<arguments.length&&void 0!==arguments[0]?arguments[0]:"initial";return{onEndResult:function(n){if("initial"===o){var r=n.match(/^[^\S\n]*(?=\S)/gm),t=r&&Math.min.apply(Math,function(n){if(Array.isArray(n)){for(var r=0,t=Array(n.length);r<n.length;r++)t[r]=n[r];return t}return Array.from(n)}(r.map(function(n){return n.length})));if(t){var e=new RegExp("^.{"+t+"}","gm");return n.replace(e,"")}return n}if("all"===o)return n.replace(/^[^\S\n]+/gm,"");throw new Error("Unknown type: "+o)}}},s=function(r,t){return{onEndResult:function(n){if(null==r||null==t)throw new Error("replaceResultTransformer requires at least 2 arguments.");return n.replace(r,t)}}},f=function(t,e){return{onSubstitution:function(n,r){if(null==t||null==e)throw new Error("replaceSubstitutionTransformer requires at least 2 arguments.");return null==n?n:n.toString().replace(t,e)}}},c={separator:"",conjunction:"",serial:!1},l=function(){var s=0<arguments.length&&void 0!==arguments[0]?arguments[0]:c;return{onSubstitution:function(n,r){if(Array.isArray(n)){var t=n.length,e=s.separator,o=s.conjunction,i=s.serial,u=r.match(/(\n?[^\S\n]+)$/);if(n=u?n.join(e+u[1]):n.join(e+" "),o&&1<t){var a=n.lastIndexOf(e);n=n.slice(0,a)+(i?e:"")+" "+o+n.slice(a+1)}}return n}}},m=function(t){return{onSubstitution:function(n,r){if(null==t||"string"!=typeof t)throw new Error("You need to specify a string character to split by.");return"string"==typeof n&&n.includes(t)&&(n=n.split(t)),n}}},p=function(n){return null!=n&&!Number.isNaN(n)&&"boolean"!=typeof n},g=function(){return{onSubstitution:function(n){return Array.isArray(n)?n.filter(p):p(n)?n:""}}},d=new e(l({separator:","}),a,u),h=new e(l({separator:",",conjunction:"and"}),a,u),y=new e(l({separator:",",conjunction:"or"}),a,u),w=new e(m("\n"),g,l,a,u),v=new e(m("\n"),l,a,u,f(/&/g,"&amp;"),f(/</g,"&lt;"),f(/>/g,"&gt;"),f(/"/g,"&quot;"),f(/'/g,"&#x27;"),f(/`/g,"&#x60;")),b=new e(s(/(?:\n(?:\s*))+/g," "),u),S=new e(s(/(?:\n\s*)/g,""),u),T=new e(l({separator:","}),s(/(?:\s+)/g," "),u),A=new e(l({separator:",",conjunction:"or"}),s(/(?:\s+)/g," "),u),E=new e(l({separator:",",conjunction:"and"}),s(/(?:\s+)/g," "),u),L=new e(l,a,u),j=new e(l,s(/(?:\s+)/g," "),u),R=new e(a,u),k=new e(a("all"),u);n.TemplateTag=e,n.trimResultTransformer=u,n.stripIndentTransformer=a,n.replaceResultTransformer=s,n.replaceSubstitutionTransformer=f,n.replaceStringTransformer=function(r,t){return{onString:function(n){if(null==r||null==t)throw new Error("replaceStringTransformer requires at least 2 arguments.");return n.replace(r,t)}}},n.inlineArrayTransformer=l,n.splitStringTransformer=m,n.removeNonPrintingValuesTransformer=g,n.commaLists=d,n.commaListsAnd=h,n.commaListsOr=y,n.html=w,n.codeBlock=w,n.source=w,n.safeHtml=v,n.oneLine=b,n.oneLineTrim=S,n.oneLineCommaLists=T,n.oneLineCommaListsOr=A,n.oneLineCommaListsAnd=E,n.inlineLists=L,n.oneLineInlineLists=j,n.stripIndent=R,n.stripIndents=k,Object.defineProperty(n,"__esModule",{value:!0})});
 
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+	typeof define === 'function' && define.amd ? define(['exports'], factory) :
+	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.throttleDebounce = {}));
+})(this, (function (exports) { 'use strict';
+
+	/* eslint-disable no-undefined,no-param-reassign,no-shadow */
+
+	/**
+	 * Throttle execution of a function. Especially useful for rate limiting
+	 * execution of handlers on events like resize and scroll.
+	 *
+	 * @param {number} delay -                  A zero-or-greater delay in milliseconds. For event callbacks, values around 100 or 250 (or even higher)
+	 *                                            are most useful.
+	 * @param {Function} callback -               A function to be executed after delay milliseconds. The `this` context and all arguments are passed through,
+	 *                                            as-is, to `callback` when the throttled-function is executed.
+	 * @param {object} [options] -              An object to configure options.
+	 * @param {boolean} [options.noTrailing] -   Optional, defaults to false. If noTrailing is true, callback will only execute every `delay` milliseconds
+	 *                                            while the throttled-function is being called. If noTrailing is false or unspecified, callback will be executed
+	 *                                            one final time after the last throttled-function call. (After the throttled-function has not been called for
+	 *                                            `delay` milliseconds, the internal counter is reset).
+	 * @param {boolean} [options.noLeading] -   Optional, defaults to false. If noLeading is false, the first throttled-function call will execute callback
+	 *                                            immediately. If noLeading is true, the first the callback execution will be skipped. It should be noted that
+	 *                                            callback will never executed if both noLeading = true and noTrailing = true.
+	 * @param {boolean} [options.debounceMode] - If `debounceMode` is true (at begin), schedule `clear` to execute after `delay` ms. If `debounceMode` is
+	 *                                            false (at end), schedule `callback` to execute after `delay` ms.
+	 *
+	 * @returns {Function} A new, throttled, function.
+	 */
+	function throttle (delay, callback, options) {
+	  var _ref = options || {},
+	      _ref$noTrailing = _ref.noTrailing,
+	      noTrailing = _ref$noTrailing === void 0 ? false : _ref$noTrailing,
+	      _ref$noLeading = _ref.noLeading,
+	      noLeading = _ref$noLeading === void 0 ? false : _ref$noLeading,
+	      _ref$debounceMode = _ref.debounceMode,
+	      debounceMode = _ref$debounceMode === void 0 ? undefined : _ref$debounceMode;
+	  /*
+	   * After wrapper has stopped being called, this timeout ensures that
+	   * `callback` is executed at the proper times in `throttle` and `end`
+	   * debounce modes.
+	   */
+
+
+	  var timeoutID;
+	  var cancelled = false; // Keep track of the last time `callback` was executed.
+
+	  var lastExec = 0; // Function to clear existing timeout
+
+	  function clearExistingTimeout() {
+	    if (timeoutID) {
+	      clearTimeout(timeoutID);
+	    }
+	  } // Function to cancel next exec
+
+
+	  function cancel(options) {
+	    var _ref2 = options || {},
+	        _ref2$upcomingOnly = _ref2.upcomingOnly,
+	        upcomingOnly = _ref2$upcomingOnly === void 0 ? false : _ref2$upcomingOnly;
+
+	    clearExistingTimeout();
+	    cancelled = !upcomingOnly;
+	  }
+	  /*
+	   * The `wrapper` function encapsulates all of the throttling / debouncing
+	   * functionality and when executed will limit the rate at which `callback`
+	   * is executed.
+	   */
+
+
+	  function wrapper() {
+	    for (var _len = arguments.length, arguments_ = new Array(_len), _key = 0; _key < _len; _key++) {
+	      arguments_[_key] = arguments[_key];
+	    }
+
+	    var self = this;
+	    var elapsed = Date.now() - lastExec;
+
+	    if (cancelled) {
+	      return;
+	    } // Execute `callback` and update the `lastExec` timestamp.
+
+
+	    function exec() {
+	      lastExec = Date.now();
+	      callback.apply(self, arguments_);
+	    }
+	    /*
+	     * If `debounceMode` is true (at begin) this is used to clear the flag
+	     * to allow future `callback` executions.
+	     */
+
+
+	    function clear() {
+	      timeoutID = undefined;
+	    }
+
+	    if (!noLeading && debounceMode && !timeoutID) {
+	      /*
+	       * Since `wrapper` is being called for the first time and
+	       * `debounceMode` is true (at begin), execute `callback`
+	       * and noLeading != true.
+	       */
+	      exec();
+	    }
+
+	    clearExistingTimeout();
+
+	    if (debounceMode === undefined && elapsed > delay) {
+	      if (noLeading) {
+	        /*
+	         * In throttle mode with noLeading, if `delay` time has
+	         * been exceeded, update `lastExec` and schedule `callback`
+	         * to execute after `delay` ms.
+	         */
+	        lastExec = Date.now();
+
+	        if (!noTrailing) {
+	          timeoutID = setTimeout(debounceMode ? clear : exec, delay);
+	        }
+	      } else {
+	        /*
+	         * In throttle mode without noLeading, if `delay` time has been exceeded, execute
+	         * `callback`.
+	         */
+	        exec();
+	      }
+	    } else if (noTrailing !== true) {
+	      /*
+	       * In trailing throttle mode, since `delay` time has not been
+	       * exceeded, schedule `callback` to execute `delay` ms after most
+	       * recent execution.
+	       *
+	       * If `debounceMode` is true (at begin), schedule `clear` to execute
+	       * after `delay` ms.
+	       *
+	       * If `debounceMode` is false (at end), schedule `callback` to
+	       * execute after `delay` ms.
+	       */
+	      timeoutID = setTimeout(debounceMode ? clear : exec, debounceMode === undefined ? delay - elapsed : delay);
+	    }
+	  }
+
+	  wrapper.cancel = cancel; // Return the wrapper function.
+
+	  return wrapper;
+	}
+
+	/* eslint-disable no-undefined */
+	/**
+	 * Debounce execution of a function. Debouncing, unlike throttling,
+	 * guarantees that a function is only executed a single time, either at the
+	 * very beginning of a series of calls, or at the very end.
+	 *
+	 * @param {number} delay -               A zero-or-greater delay in milliseconds. For event callbacks, values around 100 or 250 (or even higher) are most useful.
+	 * @param {Function} callback -          A function to be executed after delay milliseconds. The `this` context and all arguments are passed through, as-is,
+	 *                                        to `callback` when the debounced-function is executed.
+	 * @param {object} [options] -           An object to configure options.
+	 * @param {boolean} [options.atBegin] -  Optional, defaults to false. If atBegin is false or unspecified, callback will only be executed `delay` milliseconds
+	 *                                        after the last debounced-function call. If atBegin is true, callback will be executed only at the first debounced-function call.
+	 *                                        (After the throttled-function has not been called for `delay` milliseconds, the internal counter is reset).
+	 *
+	 * @returns {Function} A new, debounced function.
+	 */
+
+	function debounce (delay, callback, options) {
+	  var _ref = options || {},
+	      _ref$atBegin = _ref.atBegin,
+	      atBegin = _ref$atBegin === void 0 ? false : _ref$atBegin;
+
+	  return throttle(delay, callback, {
+	    debounceMode: atBegin !== false
+	  });
+	}
+
+	exports.debounce = debounce;
+	exports.throttle = throttle;
+
+	Object.defineProperty(exports, '__esModule', { value: true });
+
+}));
+//# sourceMappingURL=index.js.map
+
 !(function (t, e) {
   "object" == typeof exports && "undefined" != typeof module
     ? (module.exports = e())
@@ -24730,11 +24914,11 @@ function readyCanvas() {
   }
 }
 
-function savePedalCanvas() {
+const savePedalCanvas = throttleDebounce.debounce(400, () => {
   console.log("Canvas Saved!");
   localStorage["pedalCanvas"] = JSON.stringify($("#pp_canvas").html());
   historyBuffer.register();
-}
+})
 
 function saveCanvasPreview() {
   const node = $("#pp_canvas")[0];
