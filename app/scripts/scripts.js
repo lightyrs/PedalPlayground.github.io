@@ -4,10 +4,30 @@ const pedalboardImagePath = "public/images/pedalboards/";
 let ds = null;
 let historyBuffer = null;
 
+class Pedal {
+  constructor({ brand, name, width, height, image }) {
+    this.brand = brand || "";
+    this.name = name || "";
+    this.width = width || "";
+    this.height = height || "";
+    this.image = image || "";
+  }
+}
+
+class PedalBoard {
+  constructor({ brand, name, width, height, image }) {
+    this.brand = brand || "";
+    this.name = name || "";
+    this.width = width || "";
+    this.height = height || "";
+    this.image = image || "";
+  }
+}
+
 $(document).ready(() => {
   // Populate Pedalboards and Pedals lists
-  GetPedalData();
-  GetPedalBoardData();
+  getCollection("pedals");
+  getCollection("pedalboards");
 
   // Make lists searchable
   $(".pedal-list").select2({
@@ -17,7 +37,6 @@ $(document).ready(() => {
 
   $(".pedal-list").on("select2:select", (e) => {
     $("#add-selected-pedal").trigger("click");
-    console.log($(this));
     $(this).trigger("change").trigger("focus");
   });
 
@@ -26,7 +45,7 @@ $(document).ready(() => {
     width: "style",
   });
 
-  $(".pedalboard-list").on("select2:select", function (e) {
+  $(".pedalboard-list").on("select2:select", (e) => {
     $("#add-selected-pedalboard").trigger("click");
     $(this).trigger("change").trigger("focus");
   });
@@ -56,7 +75,7 @@ $(document).ready(() => {
   });
 
   // When user changes scale, update stuffs
-  $("#canvas-scale").change(function () {
+  $("#canvas-scale").on("change", () => {
     // update var
     const multiplier = $(this).val();
     $("#multiplier").val(multiplier);
@@ -345,7 +364,7 @@ function readyCanvas() {
         attributes: true,
         attributeOldValue: true,
         childList: true,
-      }
+      },
     });
   }
 
@@ -389,7 +408,7 @@ const savePedalCanvas = throttleDebounce.debounce(400, () => {
   console.log("Canvas Saved!");
   localStorage["pedalCanvas"] = JSON.stringify($("#pp_canvas").html());
   historyBuffer.register();
-})
+});
 
 function saveCanvasPreview() {
   const node = $("#pp_canvas")[0];
@@ -407,162 +426,83 @@ function saveCanvasPreview() {
     });
 }
 
-function deletePedal(pedal) {
+const deletePedal = (pedal) => {
   $(pedal).remove();
   deselect();
   savePedalCanvas();
 }
 
-function deselect() {
+const deselect = () => {
   $("#pp_canvas .panel").remove();
   ds.clearSelection();
   savePedalCanvas();
 }
 
-function deleteSelected() {
+const deleteSelected = () => {
   $("#pp_canvas .ds-selected").remove();
   $("#pp_canvas .panel").remove();
   savePedalCanvas();
 }
 
-window.Pedal = function (type, brand, name, width, height, image) {
-  this.Type = type || "";
-  this.Brand = brand || "";
-  this.Name = name || "";
-  this.Width = width || "";
-  this.Height = height || "";
-  this.Image = image || "";
-};
+window.getCollection = (collection) => {
+  const collectionMap = {
+    "pedals": {
+      className: Pedal,
+      singular: "pedal"
+    },
+    "pedalboards": {
+      className: PedalBoard,
+      singular: "pedalboard"
+    }
+  };
 
-window.GetPedalData = () => {
+  if (!collectionMap.hasOwnProperty(collection)) {
+    return false;
+  }
+
   $.ajax({
-    url: "public/data/pedals.json",
+    url: `public/data/${collection}.json`,
     dataType: "text",
     type: "GET",
     success(data) {
       data = JSON.parse(data.replace(/\r\n/g, "").replace(/\t/g, ""));
-      const pedals = [];
-      for (const pedal in data) {
-        pedals.push(
-          new Pedal(
-            data[pedal].Type || "",
-            data[pedal].Brand || "",
-            data[pedal].Name || "",
-            data[pedal].Width || "",
-            data[pedal].Height || "",
-            data[pedal].Image || ""
-          )
-        );
-      }
-      pedals.sort((a, b) => {
-        if (`${a.Brand}-${a.Name}` < `${b.Brand}-${b.Name}`) {
+      collectionItems = data.map((item) => new collectionMap[collection]["className"](item));
+      collectionItems.sort((a, b) => {
+        if (`${a.brand}-${a.name}` < `${b.brand}-${b.name}`) {
           return -1;
-        } else if (`${b.Brand}-${b.Name}` < `${a.Brand}-${a.Name}`) {
+        } else if (`${b.brand}-${b.name}` < `${a.brand}-${a.name}`) {
           return 1;
         } else {
           return 0;
         }
       });
-      pedals.forEach(RenderPedals);
-      listPedals(pedals);
+      collectionItems.forEach((item) => {
+        renderCollectionItem(collectionMap[collection]["singular"], item);
+      });
     },
   });
-};
+}
 
-window.RenderPedals = (pedals) => {
-  const { Type, Brand, Name, Width, Height, Image } = pedals;
+window.renderCollectionItem = (itemType, { brand, name, width, height, image }) => {
   const option = $("<option>", {
-    text: `${Brand} ${Name}`,
+    text: `${brand} ${name}`,
     data: {
-      width: Width,
-      height: Height,
-      image: Image,
+      width,
+      height,
+      image,
     },
   });
-  if ($("optgroup").is(`[label="${Brand}"]`)) {
-    $(`optgroup[label="${Brand}"]`).append(option);
+  if ($("optgroup").is(`[label="${brand}"]`)) {
+    $(`optgroup[label="${brand}"]`).append(option);
   } else {
     $("<optgroup>", {
-      label: Brand,
+      label: brand,
       html: option,
-    }).appendTo(".pedal-list");
+    }).appendTo(`.${itemType}-list`);
   }
 };
 
-window.PedalBoard = function (brand, name, width, height, image) {
-  this.Brand = brand || "";
-  this.Name = name || "";
-  this.Width = width || "";
-  this.Height = height || "";
-  this.Image = image || "";
-};
-
-window.GetPedalBoardData = () => {
-  $.ajax({
-    url: "public/data/pedalboards.json",
-    dataType: "text",
-    type: "GET",
-    success(data) {
-      data = JSON.parse(data.replace(/\r\n/g, "").replace(/\t/g, ""));
-      const pedalboards = [];
-      for (const pedalboard in data) {
-        pedalboards.push(
-          new PedalBoard(
-            data[pedalboard].Brand || "",
-            data[pedalboard].Name || "",
-            data[pedalboard].Width || "",
-            data[pedalboard].Height || "",
-            data[pedalboard].Image || ""
-          )
-        );
-      }
-      pedalboards.sort((a, b) => {
-        if (`${a.Brand}-${a.Name}` < `${b.Brand}-${b.Name}`) {
-          return -1;
-        } else if (`${b.Brand}-${b.Name}` < `${a.Brand}-${a.Name}`) {
-          return 1;
-        } else {
-          return 0;
-        }
-      });
-      RenderPedalBoards(pedalboards);
-    },
-  });
-};
-
-window.RenderPedalBoards = (pedalboards) => {
-  for (const i in pedalboards) {
-    const $pedalboard = $(`<option>${pedalboards[i].Brand} ${pedalboards[i].Name}</option>`);
-    $pedalboard.data("width", pedalboards[i].Width);
-    $pedalboard.data("height", pedalboards[i].Height);
-    $pedalboard.data("height", pedalboards[i].Height);
-    $pedalboard.data("image", pedalboards[i].Image);
-    $pedalboard.appendTo(".pedalboard-list");
-  }
-};
-
-window.listPedals = (pedals) => {
-  if ($("#list-pedals").length) {
-    for (const i in pedals) {
-      multiplier = 40;
-      Width = pedals[i].Width * multiplier;
-      Height = pedals[i].Height * multiplier;
-
-      const $pedalListing = $(
-        commonTags.html`
-          <div class="pedal-listing">
-            <img src="${pedalImagePath}${pedals[i].Image}" alt="${pedals[i].Brand} ${pedals[i].Name}" width="${Width}" height="${Height}"/>
-            <p class="pedal-brand">${pedals[i].Brand}</p>
-            <p class="pedal-name">${pedals[i].Name}</p>
-          </div>
-        `
-      );
-      $pedalListing.appendTo("#list-pedals");
-    }
-  }
-};
-
-var GenRandom = {
+const GenRandom = {
   Stored: [],
   Job() {
     const newId = Date.now().toString().substr(3);
@@ -580,7 +520,7 @@ var GenRandom = {
   },
 };
 
-$("body").on("click", ".item", function (e) {
+$("body").on("click", ".item", (e) => {
   const pedal = $(this);
   const id = $(this).attr("id");
   const pedalName = $(this).attr("title");
@@ -609,7 +549,7 @@ $("body").on("click", ".item", function (e) {
   e.stopPropagation();
 });
 
-$("body").on("click", 'a[href="#rotate"]', function (e) {
+$("body").on("click", 'a[href="#rotate"]', (e) => {
   e.preventDefault();
   e.stopPropagation();
   e.stopImmediatePropagation();
@@ -618,14 +558,14 @@ $("body").on("click", 'a[href="#rotate"]', function (e) {
   rotateItem($(id));
 });
 
-$("body").on("click", 'a[href="#delete"]', function () {
+$("body").on("click", 'a[href="#delete"]', () => {
   const id = $(this).parents(".panel").data("id");
   $(id).remove();
   $(".panel").remove();
   savePedalCanvas();
 });
 
-$("body").on("click", 'a[href="#front"]', function (e) {
+$("body").on("click", 'a[href="#front"]', (e) => {
   e.stopImmediatePropagation();
   const id = $(this).parents(".panel").data("id");
   $(id).next().insertBefore(id);
@@ -633,7 +573,7 @@ $("body").on("click", 'a[href="#front"]', function (e) {
   e.stopPropagation();
 });
 
-$("body").on("click", 'a[href="#back"]', function (e) {
+$("body").on("click", 'a[href="#back"]', (e) => {
   e.stopImmediatePropagation();
   const id = $(this).parents(".panel").data("id");
   $(id).prev().insertAfter(id);
@@ -641,7 +581,7 @@ $("body").on("click", 'a[href="#back"]', function (e) {
   e.stopPropagation();
 });
 
-$("body").click(() => {
+$("body").on("click", () => {
   // reset stuff
   $(".panel").remove();
 });

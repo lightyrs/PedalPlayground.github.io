@@ -1,71 +1,70 @@
 {
-	"$schema": "http://json-schema.org/draft-04/schema#",
-	"type": "array",
-	"items": [
-		{
-			"type": "object",
-			"properties": {
-				"Brand": {
-					"type": "string"
-				},
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "array",
+  "items": [
+    {
+      "type": "object",
+      "properties": {
+        "brand": {
+          "type": "string"
+        },
 
-				"Name": {
-					"type": "string"
-				},
+        "name": {
+          "type": "string"
+        },
 
-				"Width": {
-					"type": "number"
-				},
+        "width": {
+          "type": "number"
+        },
 
-				"Height": {
-					"type": "number"
-				},
+        "height": {
+          "type": "number"
+        },
 
-				"Image": {
-					"type": "string"
-				}
-			},
+        "image": {
+          "type": "string"
+        }
+      },
 
-			"required": [
-				"Brand",
-				"Name",
-				"Width",
-				"Height",
-				"Image"
-			]
-		},
+      "required": [
+        "brand",
+        "name",
+        "width",
+        "height",
+        "image"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "brand": {
+          "type": "string"
+        },
 
-		{
-			"type": "object",
-			"properties": {
-				"Brand": {
-					"type": "string"
-				},
+        "name": {
+          "type": "string"
+        },
 
-				"Name": {
-					"type": "string"
-				},
+        "width": {
+          "type": "number"
+        },
 
-				"Width": {
-					"type": "number"
-				},
+        "height": {
+          "type": "number"
+        },
 
-				"Height": {
-					"type": "number"
-				},
+        "image": {
+          "type": "string"
+        }
+      },
 
-				"Image": {
-					"type": "string"
-				}
-			},
-
-			"required": [
-				"Brand",
-				"Name",
-				"Width",
-				"Height",
-				"Image"
-			]
-		}
-	]
+      "required": [
+        "brand",
+        "name",
+        "width",
+        "height",
+        "image"
+      ]
+    }
+  ]
 }
