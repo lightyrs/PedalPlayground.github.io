@@ -24,6 +24,19 @@ class PedalBoard {
   }
 }
 
+const collectionMap = {
+  pedals: {
+    className: Pedal,
+    imageRoute: pedalImagePath,
+    singular: "pedal",
+  },
+  pedalboards: {
+    className: PedalBoard,
+    imageRoute: pedalboardImagePath,
+    singular: "pedalboard",
+  },
+};
+
 $(document).ready(() => {
   // Populate Pedalboards and Pedals lists
   getCollection("pedals");
@@ -132,57 +145,12 @@ $(document).ready(() => {
   });
 
   $("body").on("click", "#add-pedal button", (event) => {
-    const multiplier = $("#canvas-scale").val();
-    const serial = GenRandom.Job();
-    const selected = $("#add-pedal").find(":selected");
-    const name = $(selected).text();
-    const shortname = $(selected).attr("id");
-    const width = $(selected).data("width");
-    const height = $(selected).data("height");
-    const scaledWidth = $(selected).data("width") * multiplier;
-    const scaledHeight = $(selected).data("height") * multiplier;
-    const i = $(selected).data("image");
-    const pedal = commonTags.html`
-      <div id="item-${serial}" class="item pedal ${shortname} rotate-0 ds-selectable" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
-        <div class="artwork" style="width:${scaledWidth}px;height:${scaledHeight}px; background-image:url(${pedalImagePath}${i})"></div>
-        <div class="actions">
-          <a class="rotate"></a>
-          <a class="delete"></a>
-        </div>
-      </div>
-    `;
-    $("#pp_canvas").append(pedal);
-    ds.setSelection(document.getElementById(`item-${serial}`));
-
-    ga("send", "event", "Pedal", "added", name);
+    addCollectionItem("pedals");
     event.preventDefault();
   });
 
   $("body").on("click", "#add-pedalboard button", (event) => {
-    const serial = GenRandom.Job();
-    const multiplier = $("#canvas-scale").val();
-    const selected = $("#add-pedalboard").find(":selected");
-    const name = $(selected).text();
-    const shortname = $(selected).attr("id");
-    const width = $(selected).data("width");
-    const height = $(selected).data("height");
-    const scaledWidth = $(selected).data("width") * multiplier;
-    const scaledHeight = $(selected).data("height") * multiplier;
-    const i = $(selected).data("image");
-    const pedal = commonTags.html`
-      <div id="item-${serial}" class="item pedalboard ${shortname} rotate-0 ds-selectable" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
-        <div class="artwork" style="width:${scaledWidth}px;height:${scaledHeight}px; background-image:url(${pedalboardImagePath}${i})"></div>
-        <div class="actions">
-          <a class="rotate"></a>
-          <a class="delete"></a>
-        </div>
-      </div>
-    `;
-
-    $("#pp_canvas").prepend(pedal);
-    ds.setSelection(document.getElementById(`item-${serial}`));
-
-    ga("send", "event", "Pedalboard", "added", name);
+    addCollectionItem("pedalboards");
     event.preventDefault();
   });
 
@@ -279,19 +247,24 @@ $(document).ready(() => {
     }
   });
 
-  hotkeys("shift+u, shift+r", { keyup: true}, (event, handler) => {
-    if (event.type == "keyup") {
-      switch (handler.key) {
-        case "shift+u":
-          historyBuffer.undo();
-          break;
-        case "shift+r":
-          historyBuffer.redo();
-          break;
+  hotkeys(
+    "shift+u, shift+r",
+    { keyup: true },
+    (event, handler) => {
+      if (event.type === "keyup") {
+        switch (handler.key) {
+          case "shift+u":
+            historyBuffer.undo();
+            break;
+          case "shift+r":
+            historyBuffer.redo();
+            break;
+        }
+        savePedalCanvas();
       }
-      savePedalCanvas();
+      return false;
     }
-  });
+  );
 
   hotkeys(
     "[, ], shift+d, shift+del, shift+delete, shift+backspace",
@@ -304,13 +277,13 @@ $(document).ready(() => {
           case "shift+delete":
           case "shift+backspace":
             deleteSelected();
-            $(".site-body > .panel").remove();
+            // $(".site-body > .panel").remove();
             break;
           case "[":
-            $(".panel a[href='#back']").click();
+            $(".panel a[href='#back']").trigger("click");
             break;
           case "]":
-            $(".panel a[href='#front']").click();
+            $(".panel a[href='#front']").trigger("click");
             break;
         }
         savePedalCanvas();
@@ -327,7 +300,7 @@ $(document).ready(() => {
   });
 }); // End Document ready
 
-function rotateItem(targets = $("#pp_canvas .ds-selected")) {
+const rotateItem = (targets = $("#pp_canvas .ds-selected")) => {
   targets.each((i, selected) => {
     let oldClass = null;
     let newClass = null;
@@ -356,7 +329,7 @@ function rotateItem(targets = $("#pp_canvas .ds-selected")) {
   });
 }
 
-function readyCanvas() {
+const readyCanvas = () => {
   if (historyBuffer == null) {
     historyBuffer = new snapback(document.getElementById("pp_canvas"), {
       observe: {
@@ -398,6 +371,16 @@ function readyCanvas() {
       }
     });
 
+    ds.subscribe("elementselect", (callback_object) => {
+      console.log(callback_object.item);
+      addToPanel(callback_object.item);
+    });
+
+    ds.subscribe("elementunselect", (callback_object) => {
+      console.log(callback_object.item);
+      removeFromPanel(callback_object.item);
+    });
+
     ds.clearSelection();
 
     savePedalCanvas();
@@ -410,7 +393,7 @@ const savePedalCanvas = throttleDebounce.debounce(400, () => {
   historyBuffer.register();
 });
 
-function saveCanvasPreview() {
+const saveCanvasPreview = () => {
   const node = $("#pp_canvas")[0];
 
   htmlToImage
@@ -426,6 +409,38 @@ function saveCanvasPreview() {
     });
 }
 
+const addCollectionItem = (collection) => {
+  if (!collectionMap.hasOwnProperty(collection)) {
+    return false;
+  }
+
+  const itemType = collectionMap[collection]["singular"];
+  const serial = GenRandom.Job();
+  const multiplier = $("#canvas-scale").val();
+  const selected = $(`#add-${itemType}`).find(":selected");
+  const name = $(selected).text();
+  const shortname = $(selected).attr("id");
+  const width = $(selected).data("width");
+  const height = $(selected).data("height");
+  const scaledWidth = $(selected).data("width") * multiplier;
+  const scaledHeight = $(selected).data("height") * multiplier;
+  const i = $(selected).data("image");
+  const item = commonTags.html`
+    <div id="item-${serial}" class="item ${itemType} ${shortname} rotate-0 ds-selectable" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
+      <div class="artwork" style="width:${scaledWidth}px;height:${scaledHeight}px; background-image:url(${collectionMap[collection]["imageRoute"]}${i})"></div>
+      <div class="actions">
+        <a class="rotate"></a>
+        <a class="delete"></a>
+      </div>
+    </div>
+  `;
+
+  $("#pp_canvas").prepend(item);
+  ds.setSelection(document.getElementById(`item-${serial}`));
+
+  ga("send", "event", `${itemType}`, "added", name);
+}
+
 const deletePedal = (pedal) => {
   $(pedal).remove();
   deselect();
@@ -433,29 +448,18 @@ const deletePedal = (pedal) => {
 }
 
 const deselect = () => {
-  $("#pp_canvas .panel").remove();
+  // $("#pp_canvas .panel").remove();
   ds.clearSelection();
   savePedalCanvas();
 }
 
 const deleteSelected = () => {
   $("#pp_canvas .ds-selected").remove();
-  $("#pp_canvas .panel").remove();
+  // $("#pp_canvas .panel").remove();
   savePedalCanvas();
 }
 
-window.getCollection = (collection) => {
-  const collectionMap = {
-    "pedals": {
-      className: Pedal,
-      singular: "pedal"
-    },
-    "pedalboards": {
-      className: PedalBoard,
-      singular: "pedalboard"
-    }
-  };
-
+const getCollection = (collection) => {
   if (!collectionMap.hasOwnProperty(collection)) {
     return false;
   }
@@ -466,7 +470,7 @@ window.getCollection = (collection) => {
     type: "GET",
     success(data) {
       data = JSON.parse(data.replace(/\r\n/g, "").replace(/\t/g, ""));
-      collectionItems = data.map((item) => new collectionMap[collection]["className"](item));
+      let collectionItems = data.map((item) => new collectionMap[collection]["className"](item));
       collectionItems.sort((a, b) => {
         if (`${a.brand}-${a.name}` < `${b.brand}-${b.name}`) {
           return -1;
@@ -483,7 +487,7 @@ window.getCollection = (collection) => {
   });
 }
 
-window.renderCollectionItem = (itemType, { brand, name, width, height, image }) => {
+const renderCollectionItem = (itemType, { brand, name, width, height, image }) => {
   const option = $("<option>", {
     text: `${brand} ${name}`,
     data: {
@@ -492,15 +496,82 @@ window.renderCollectionItem = (itemType, { brand, name, width, height, image }) 
       image,
     },
   });
-  if ($("optgroup").is(`[label="${brand}"]`)) {
-    $(`optgroup[label="${brand}"]`).append(option);
+  if ($(`.${itemType}-list optgroup[label="${brand}"]`).length > 0) {
+    $(`.${itemType}-list optgroup[label="${brand}"]`).append(option);
   } else {
     $("<optgroup>", {
       label: brand,
       html: option,
     }).appendTo(`.${itemType}-list`);
   }
-};
+}
+
+const addToPanel = (item) => {
+  const { id, title: itemName } = item;
+  const width = item.getAttribute("data-width");
+  const height = item.getAttribute("data-height");
+  let ids = document.getElementById("pp_panel").getAttribute("data-ids") || "";
+  ids = ids
+    .split(",")
+    .concat(id)
+    .filter((el) => el != "")
+    .join(",");
+
+  const markup = commonTags.html`
+    <div class="panel__name" id="panel__id_${id}">
+      ${itemName}
+      <br>
+      <span class="panel__dimensions">(${width} x ${height})</span>
+    </div>
+  `;
+
+  $("#pp_panel")
+    .attr("data-ids", ids)
+    .prepend(markup)
+    .removeClass("hide");
+}
+
+const removeFromPanel = (item) => {
+  let ids = document.getElementById("pp_panel").getAttribute("data-ids") || "";
+  ids = ids.split(",").filter((el) => el != "" && el != item.id);
+
+  if (ids.length == 0) {
+    $("#pp_panel").attr("data-ids", "").addClass("hide");
+  } else {
+    $("#pp_panel").attr("data-ids", ids.join(","));
+  }
+
+  document.getElementById(`panel__id_${item.id}`).remove();
+}
+
+const renderPanel = (event) => {
+  const item = event.currentTarget;
+  const id = $(item).attr("id");
+  const itemName = $(item).attr("title");
+  const width = $(item).attr("data-width");
+  const height = $(item).attr("data-height");
+  const markup = commonTags.html`
+    <div class="panel" data-id="#${id}">
+      <div class="panel__name">
+        ${itemName}
+        <br>
+        <span class="panel__dimensions">(${width} x ${height})</span>
+      </div>
+      <a href="#rotate" class="panel__action">Rotate <i>R</i></a>
+      <a href="#front" class="panel__action">Move Front <i>]</i></a>
+      <a href="#back" class="panel__action">Move Back <i>[</i></a>
+      <a href="#delete" class="panel__action">Delete <i>shift+D</i></a>
+    </div>
+  `;
+
+  // reset stuff
+  $(".panel").remove();
+
+  $("#pp_canvas").after(markup);
+
+  // Prevent bubble up to .canvas
+  event.stopPropagation();
+}
 
 const GenRandom = {
   Stored: [],
@@ -518,70 +589,44 @@ const GenRandom = {
     }
     return false;
   },
-};
+}
 
-$("body").on("click", ".item", (e) => {
-  const pedal = $(this);
-  const id = $(this).attr("id");
-  const pedalName = $(this).attr("title");
-  const width = $(this).attr("data-width");
-  const height = $(this).attr("data-height");
-  const markup = commonTags.html`
-    <div class="panel" data-id="#${id}">
-      <div class="panel__name">
-        ${pedalName}
-        <br>
-        <span class="panel__dimensions">(${width} x ${height})</span>
-      </div>
-      <a href="#rotate" class="panel__action">Rotate <i>R</i></a>
-      <a href="#front" class="panel__action">Move Front <i>]</i></a>
-      <a href="#back" class="panel__action">Move Back <i>[</i></a>
-      <a href="#delete" class="panel__action">Delete <i>shift+D</i></a>
-    </div>
-  `;
+$("body").on("click", 'a[href="#rotate"]', (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+  event.stopImmediatePropagation();
 
-  // reset stuff
-  $(".panel").remove();
-
-  $("#pp_canvas").after(markup);
-
-  // Prevent bubble up to .canvas
-  e.stopPropagation();
-});
-
-$("body").on("click", 'a[href="#rotate"]', (e) => {
-  e.preventDefault();
-  e.stopPropagation();
-  e.stopImmediatePropagation();
-
-  const id = $(this).parents(".panel").data("id");
+  const id = $(event.currentTarget).parents(".panel").data("id");
   rotateItem($(id));
 });
 
-$("body").on("click", 'a[href="#delete"]', () => {
-  const id = $(this).parents(".panel").data("id");
+$("body").on("click", 'a[href="#delete"]', (event) => {
+  event.preventDefault();
+  const id = $(event.currentTarget).parents(".panel").data("id");
   $(id).remove();
-  $(".panel").remove();
+  // $(".panel").remove();
   savePedalCanvas();
 });
 
-$("body").on("click", 'a[href="#front"]', (e) => {
-  e.stopImmediatePropagation();
-  const id = $(this).parents(".panel").data("id");
+$("body").on("click", 'a[href="#front"]', (event) => {
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  const id = $(event.currentTarget).parents(".panel").data("id");
   $(id).next().insertBefore(id);
   savePedalCanvas();
-  e.stopPropagation();
+  event.stopPropagation();
 });
 
-$("body").on("click", 'a[href="#back"]', (e) => {
-  e.stopImmediatePropagation();
-  const id = $(this).parents(".panel").data("id");
+$("body").on("click", 'a[href="#back"]', (event) => {
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  const id = $(event.currentTarget).parents(".panel").data("id");
   $(id).prev().insertAfter(id);
   savePedalCanvas();
-  e.stopPropagation();
+  event.stopPropagation();
 });
 
 $("body").on("click", () => {
   // reset stuff
-  $(".panel").remove();
+  // $(".panel").remove();
 });
