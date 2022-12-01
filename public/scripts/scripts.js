@@ -24901,12 +24901,10 @@ const readyCanvas = () => {
     });
 
     ds.subscribe("elementselect", (callback_object) => {
-      console.log(callback_object.item);
       addToPanel(callback_object.item);
     });
 
     ds.subscribe("elementunselect", (callback_object) => {
-      console.log(callback_object.item);
       removeFromPanel(callback_object.item);
     });
 
@@ -25073,35 +25071,6 @@ const removeFromPanel = (item) => {
   document.getElementById(`panel__id_${item.id}`).remove();
 }
 
-const renderPanel = (event) => {
-  const item = event.currentTarget;
-  const id = $(item).attr("id");
-  const itemName = $(item).attr("title");
-  const width = $(item).attr("data-width");
-  const height = $(item).attr("data-height");
-  const markup = commonTags.html`
-    <div class="panel" data-id="#${id}">
-      <div class="panel__name">
-        ${itemName}
-        <br>
-        <span class="panel__dimensions">(${width} x ${height})</span>
-      </div>
-      <a href="#rotate" class="panel__action">Rotate <i>R</i></a>
-      <a href="#front" class="panel__action">Move Front <i>]</i></a>
-      <a href="#back" class="panel__action">Move Back <i>[</i></a>
-      <a href="#delete" class="panel__action">Delete <i>shift+D</i></a>
-    </div>
-  `;
-
-  // reset stuff
-  $(".panel").remove();
-
-  $("#pp_canvas").after(markup);
-
-  // Prevent bubble up to .canvas
-  event.stopPropagation();
-}
-
 const GenRandom = {
   Stored: [],
   Job() {
@@ -25125,14 +25094,12 @@ $("body").on("click", 'a[href="#rotate"]', (event) => {
   event.stopPropagation();
   event.stopImmediatePropagation();
 
-  const id = $(event.currentTarget).parents(".panel").data("id");
-  rotateItem($(id));
+  rotateItem();
 });
 
 $("body").on("click", 'a[href="#delete"]', (event) => {
   event.preventDefault();
-  const id = $(event.currentTarget).parents(".panel").data("id");
-  $(id).remove();
+  deleteSelected();
   // $(".panel").remove();
   savePedalCanvas();
 });
@@ -25140,8 +25107,20 @@ $("body").on("click", 'a[href="#delete"]', (event) => {
 $("body").on("click", 'a[href="#front"]', (event) => {
   event.preventDefault();
   event.stopImmediatePropagation();
-  const id = $(event.currentTarget).parents(".panel").data("id");
-  $(id).next().insertBefore(id);
+  let ids = $(event.currentTarget).parents(".panel").attr("data-ids") || "";
+  ids = ids.split(",")
+
+  ids.sort((a, b) => {
+    return $("#pp_canvas .item").index(document.getElementById(b)) - $("#pp_canvas .item").index(document.getElementById(a));
+  });
+
+  let maxIndex = $("#pp_canvas .item").index(document.getElementById(ids[0]));
+  maxIndex = Math.min(maxIndex + 1, $("#pp_canvas .item").length);
+
+  ids.forEach((el, index) => {
+    $(`#${el}`).insertAfter($("#pp_canvas .item").eq(maxIndex - index));
+  });
+
   savePedalCanvas();
   event.stopPropagation();
 });
@@ -25149,8 +25128,23 @@ $("body").on("click", 'a[href="#front"]', (event) => {
 $("body").on("click", 'a[href="#back"]', (event) => {
   event.preventDefault();
   event.stopImmediatePropagation();
-  const id = $(event.currentTarget).parents(".panel").data("id");
-  $(id).prev().insertAfter(id);
+  let ids = $(event.currentTarget).parents(".panel").attr("data-ids") || "";
+  ids = ids.split(",");
+
+  ids.sort((a, b) => {
+    return (
+      $("#pp_canvas .item").index(document.getElementById(a)) -
+      $("#pp_canvas .item").index(document.getElementById(b))
+    );
+  });
+
+  let minIndex = $("#pp_canvas .item").index(document.getElementById(ids[0]));
+  minIndex = Math.max(minIndex - 1, 0);
+
+  ids.forEach((el, index) => {
+    $(`#${el}`).insertBefore($("#pp_canvas .item").eq(minIndex + index));
+  });
+
   savePedalCanvas();
   event.stopPropagation();
 });

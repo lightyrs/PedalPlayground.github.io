@@ -9013,7 +9013,7 @@ body {
 }
 
 .panel {
-  z-index: 3;
+  z-index: 99999 !important;
   display: none;
 }
 @media (prefers-color-scheme: dark) {
@@ -9150,6 +9150,10 @@ body {
 
 .select2-container--default .select2-results__option--highlighted[aria-selected] {
   background: #8582ff;
+}
+
+.ds-selector-area {
+  z-index: 9999 !important;
 }
 
 @media (prefers-color-scheme: dark) {

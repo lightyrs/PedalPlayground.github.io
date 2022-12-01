@@ -573,7 +573,7 @@ body {
 }
 
 .panel {
-  z-index: 3;
+  z-index: 99999 !important;
   display: none;
 
   @media (prefers-color-scheme: dark) {
@@ -616,7 +616,6 @@ body {
       i {
         font-style: normal;
         color: #999;
-        // border: 1px solid #ddd;
         float: right;
         border-radius: 3px;
         font-family: menlo, inconsolata, monospace;
@@ -714,4 +713,8 @@ body {
 
 .select2-container--default .select2-results__option--highlighted[aria-selected] {
   background: $brand-primary;
+}
+
+.ds-selector-area {
+  z-index: 9999 !important;
 }
