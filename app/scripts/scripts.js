@@ -1,43 +1,21 @@
 const pedalImagePath = "public/images/pedals/";
 const pedalboardImagePath = "public/images/pedalboards/";
 
-let ds = null;
-let historyBuffer = null;
-
-class Pedal {
-  constructor({ brand, name, width, height, image }) {
-    this.brand = brand || "";
-    this.name = name || "";
-    this.width = width || "";
-    this.height = height || "";
-    this.image = image || "";
-  }
-}
-
-class PedalBoard {
-  constructor({ brand, name, width, height, image }) {
-    this.brand = brand || "";
-    this.name = name || "";
-    this.width = width || "";
-    this.height = height || "";
-    this.image = image || "";
-  }
-}
-
 const collectionMap = {
   pedals: {
-    className: Pedal,
     imageRoute: pedalImagePath,
     singular: "pedal",
   },
   pedalboards: {
-    className: PedalBoard,
     imageRoute: pedalboardImagePath,
     singular: "pedalboard",
   },
 };
 
-$(document).ready(() => {
+let ds = null;
+let historyBuffer = null;
+
+$(() => {
   // Populate Pedalboards and Pedals lists
   getCollection("pedals");
   getCollection("pedalboards");
@@ -48,9 +26,8 @@ $(document).ready(() => {
     width: "style",
   });
 
-  $(".pedal-list").on("select2:select", (e) => {
-    $("#add-selected-pedal").trigger("click");
-    $(this).trigger("change").trigger("focus");
+  $(".pedal-list").on("select2:select", (event) => {
+    addCollectionItem("pedals", event.params.data.element);
   });
 
   $(".pedalboard-list").select2({
@@ -58,34 +35,31 @@ $(document).ready(() => {
     width: "style",
   });
 
-  $(".pedalboard-list").on("select2:select", (e) => {
-    $("#add-selected-pedalboard").trigger("click");
-    $(this).trigger("change").trigger("focus");
+  $(".pedalboard-list").on("select2:select", (event) => {
+    addCollectionItem("pedals", event.params.data.element);
   });
 
-  $(() => {
-    // Load canvas from localStorage if it has been saved prior
-    if (localStorage["pedalCanvas"] != null) {
-      $("#pp_canvas").html(JSON.parse(localStorage["pedalCanvas"]).replaceAll(/ds\-(?:selected|hover)/g, ""));
-      readyCanvas();
-    } else {
-      readyCanvas();
-    }
+  // Load canvas from localStorage if it has been saved prior
+  if (localStorage["pedalCanvas"] != null) {
+    $("#pp_canvas").html(JSON.parse(localStorage["pedalCanvas"]).replaceAll(/ds\-(?:selected|hover)/g, ""));
+    readyCanvas();
+  } else {
+    readyCanvas();
+  }
 
-    // If hidden multiplier value doesn't exist, create it
-    if ($("#multiplier").length == 0) {
-      $("#pp_canvas").append('<input id="multiplier" type="hidden" value="25">');
-      var multiplier = 25;
-      // If hidden multiplier value does exist set variable
-    } else {
-      var multiplier = $("#multiplier").val();
-    }
-    // Set canvas scale input and bg size to match scale
-    $("#canvas-scale").val(multiplier);
-    $("#pp_canvas").css("background-size", `${multiplier}px`);
+  // If hidden multiplier value doesn't exist, create it
+  if ($("#multiplier").length == 0) {
+    $("#pp_canvas").append('<input id="multiplier" type="hidden" value="25">');
+    var multiplier = 25;
+    // If hidden multiplier value does exist set variable
+  } else {
+    var multiplier = $("#multiplier").val();
+  }
+  // Set canvas scale input and bg size to match scale
+  $("#canvas-scale").val(multiplier);
+  $("#pp_canvas").css("background-size", `${multiplier}px`);
 
-    historyBuffer.enable();
-  });
+  historyBuffer.enable();
 
   // When user changes scale, update stuffs
   $("#canvas-scale").on("change", () => {
@@ -128,14 +102,14 @@ $(document).ready(() => {
     savePedalCanvas();
   });
 
-  $("body").on("click", ".sidebar-open", (e) => {
+  $("body").on("click", ".sidebar-open", (event) => {
     $(".site-body").addClass("is-slid");
-    e.preventDefault();
+    event.preventDefault();
   });
 
-  $("body").on("click", ".sidebar-close", (e) => {
+  $("body").on("click", ".sidebar-close", (event) => {
     $(".site-body").removeClass("is-slid");
-    e.preventDefault();
+    event.preventDefault();
   });
 
   $("body").on("click", "#clear-canvas-confirmation", () => {
@@ -203,7 +177,7 @@ $(document).ready(() => {
       $("#pp_canvas").append(pedal);
       ds.setSelection(document.getElementById(`item-${serial}`));
 
-      ga("send", "event", "CustomPedal", "added", `${dims} ${name}`);
+      // ga("send", "event", "CustomPedal", "added", `${dims} ${name}`);
       event.preventDefault();
     }
   });
@@ -242,7 +216,7 @@ $(document).ready(() => {
       $("#pp_canvas").prepend(pedalboard);
       ds.setSelection(document.getElementById(`item-${serial}`));
 
-      ga("send", "event", "CustomPedalboard", "added", `${dims} ${name}`);
+      // ga("send", "event", "CustomPedalboard", "added", `${dims} ${name}`);
       event.preventDefault();
     }
   });
@@ -352,6 +326,8 @@ const readyCanvas = () => {
     });
 
     ds.subscribe("callback", (callback_object) => {
+      $("body").removeClass("dragging");
+
       if (callback_object.isDragging) {
         if (callback_object.event.target.className == "delete") {
           deletePedal($(callback_object.event.target).parents(".item")[0]);
@@ -364,11 +340,15 @@ const readyCanvas = () => {
           let currentCords = ds.getPreviousCursorPositionArea();
           if (["x", "y"].some((key) => initialCords[key] != currentCords[key])) {
             console.log("dragEnd");
-            ga("send", "event", "Canvas", "moved", "dragend");
+            // ga("send", "event", "Canvas", "moved", "dragend");
             savePedalCanvas();
           }
         }
       }
+    });
+
+    ds.subscribe("dragstart", (_callback_object) => {
+      $("body").addClass("dragging");
     });
 
     ds.subscribe("elementselect", (callback_object) => {
@@ -407,7 +387,7 @@ const saveCanvasPreview = () => {
     });
 }
 
-const addCollectionItem = (collection) => {
+const addCollectionItem = (collection, element) => {
   if (!collectionMap.hasOwnProperty(collection)) {
     return false;
   }
@@ -415,14 +395,13 @@ const addCollectionItem = (collection) => {
   const itemType = collectionMap[collection]["singular"];
   const serial = GenRandom.Job();
   const multiplier = $("#canvas-scale").val();
-  const selected = $(`#add-${itemType}`).find(":selected");
-  const name = $(selected).text();
-  const shortname = $(selected).attr("id");
-  const width = $(selected).data("width");
-  const height = $(selected).data("height");
-  const scaledWidth = $(selected).data("width") * multiplier;
-  const scaledHeight = $(selected).data("height") * multiplier;
-  const i = $(selected).data("image");
+  const name = element.textContent;
+  const shortname = element.getAttribute("id");
+  const width = element.getAttribute("data-width");
+  const height = element.getAttribute("data-height");
+  const scaledWidth = width * multiplier;
+  const scaledHeight = height * multiplier;
+  const i = element.getAttribute("data-image");
   const item = commonTags.html`
     <div id="item-${serial}" class="item ${itemType} ${shortname} rotate-0 ds-selectable" title="${name}" data-width="${width}" data-height="${height}" data-scale="${multiplier}">
       <div class="artwork" style="width:${scaledWidth}px;height:${scaledHeight}px; background-image:url(${collectionMap[collection]["imageRoute"]}${i})"></div>
@@ -433,10 +412,10 @@ const addCollectionItem = (collection) => {
     </div>
   `;
 
-  $("#pp_canvas").prepend(item);
+  $(item).insertBefore("#multiplier");
   ds.setSelection(document.getElementById(`item-${serial}`));
 
-  ga("send", "event", `${itemType}`, "added", name);
+  // ga("send", "event", `${itemType}`, "added", name);
 }
 
 const deletePedal = (pedal) => {
@@ -462,14 +441,14 @@ const getCollection = (collection) => {
     return false;
   }
 
+  const itemType = collectionMap[collection]["singular"];
+
   $.ajax({
     url: `public/data/${collection}.json`,
-    dataType: "text",
+    dataType: "json",
     type: "GET",
     success(data) {
-      data = JSON.parse(data.replace(/\r\n/g, "").replace(/\t/g, ""));
-      let collectionItems = data.map((item) => new collectionMap[collection]["className"](item));
-      collectionItems.sort((a, b) => {
+      data.sort((a, b) => {
         if (`${a.brand}-${a.name}` < `${b.brand}-${b.name}`) {
           return -1;
         } else if (`${b.brand}-${b.name}` < `${a.brand}-${a.name}`) {
@@ -478,29 +457,20 @@ const getCollection = (collection) => {
           return 0;
         }
       });
-      collectionItems.forEach((item) => {
-        renderCollectionItem(collectionMap[collection]["singular"], item);
-      });
+      data.forEach((item) => renderCollectionItem(itemType, item));
     },
   });
 }
 
 const renderCollectionItem = (itemType, { brand, name, width, height, image }) => {
-  const option = $("<option>", {
-    text: `${brand} ${name}`,
-    data: {
-      width,
-      height,
-      image,
-    },
-  });
+  const option = commonTags.html`
+    <option data-width="${width}" data-height="${height}" data-image="${image}">${brand} ${name}</option>
+  `;
+
   if ($(`.${itemType}-list optgroup[label="${brand}"]`).length > 0) {
     $(`.${itemType}-list optgroup[label="${brand}"]`).append(option);
   } else {
-    $("<optgroup>", {
-      label: brand,
-      html: option,
-    }).appendTo(`.${itemType}-list`);
+    $(`<optgroup label="${brand}">${option}</optgroup>`).appendTo(`.${itemType}-list`);
   }
 }
 
@@ -546,17 +516,11 @@ const GenRandom = {
   Stored: [],
   Job() {
     const newId = Date.now().toString().substr(3);
-    if (!this.Check(newId)) {
+    if (this.Stored.indexOf(newId) == -1) {
       this.Stored.push(newId);
       return newId;
     }
     return this.Job();
-  },
-  Check(id) {
-    for (let i = 0; i < this.Stored.length; i++) {
-      if (this.Stored[i] == id) return true;
-    }
-    return false;
   },
 }
 
@@ -578,11 +542,15 @@ $("body").on("click", 'a[href="#delete"]', (event) => {
 $("body").on("click", 'a[href="#front"]', (event) => {
   event.preventDefault();
   event.stopImmediatePropagation();
+
   let ids = $(event.currentTarget).parents(".panel").attr("data-ids") || "";
   ids = ids.split(",")
 
   ids.sort((a, b) => {
-    return $("#pp_canvas .item").index(document.getElementById(b)) - $("#pp_canvas .item").index(document.getElementById(a));
+    return (
+      $("#pp_canvas .item").index(document.getElementById(b)) -
+      $("#pp_canvas .item").index(document.getElementById(a))
+    );
   });
 
   let maxIndex = $("#pp_canvas .item").index(document.getElementById(ids[0]));
@@ -599,6 +567,7 @@ $("body").on("click", 'a[href="#front"]', (event) => {
 $("body").on("click", 'a[href="#back"]', (event) => {
   event.preventDefault();
   event.stopImmediatePropagation();
+
   let ids = $(event.currentTarget).parents(".panel").attr("data-ids") || "";
   ids = ids.split(",");
 
@@ -618,9 +587,4 @@ $("body").on("click", 'a[href="#back"]', (event) => {
 
   savePedalCanvas();
   event.stopPropagation();
-});
-
-$("body").on("click", () => {
-  // reset stuff
-  // $(".panel").remove();
 });

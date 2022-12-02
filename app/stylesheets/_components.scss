@@ -718,3 +718,10 @@ body {
 .ds-selector-area {
   z-index: 9999 !important;
 }
+
+body.dragging {
+
+  #pp_panel {
+    user-select: none;
+  }
+}
