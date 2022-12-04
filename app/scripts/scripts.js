@@ -112,10 +112,11 @@ $(() => {
     event.preventDefault();
   });
 
-  $("body").on("click", "#clear-canvas-confirmation", () => {
+  $("body").on("click", "#clear-canvas-confirmation", (event) => {
     $("#pp_canvas").empty();
     $("#clear-canvas-modal").modal("hide");
     savePedalCanvas();
+    event.preventDefault();
   });
 
   $("body").on("click", "#add-pedal button", (event) => {
@@ -167,14 +168,14 @@ $(() => {
 
     if (width == "" || height == "") {
       $("#add-custom-pedal .custom-height, #add-custom-pedal .custom-width").addClass("invalid");
-      $("#add-custom-pedal .custom-width").focus();
+      $("#add-custom-pedal .custom-width").trigger("focus");
     } else if (width == "") {
-      $("#add-custom-pedal .custom-width").addClass("invalid").focus();
+      $("#add-custom-pedal .custom-width").addClass("invalid").trigger("focus");
     } else if (height == "") {
-      $("#add-custom-pedal .custom-height").addClass("invalid").focus();
+      $("#add-custom-pedal .custom-height").addClass("invalid").trigger("focus");
     } else {
       console.log("add custom pedal...");
-      $("#pp_canvas").append(pedal);
+      $(pedal).insertBefore("#multiplier");
       ds.setSelection(document.getElementById(`item-${serial}`));
 
       // ga("send", "event", "CustomPedal", "added", `${dims} ${name}`);
@@ -195,11 +196,11 @@ $(() => {
 
     if (width == "" || height == "") {
       $("#add-custom-pedalboard .custom-height, #add-custom-pedalboard .custom-width").addClass("invalid");
-      $("#add-custom-pedalboard .custom-width").focus();
+      $("#add-custom-pedalboard .custom-width").trigger("focus");
     } else if (width == "") {
-      $("#add-custom-pedalboard .custom-width").addClass("invalid").focus();
+      $("#add-custom-pedalboard .custom-width").addClass("invalid").trigger("focus");
     } else if (height == "") {
-      $("#add-custom-pedalboard .custom-height").addClass("invalid").focus();
+      $("#add-custom-pedalboard .custom-height").addClass("invalid").trigger("focus");
     } else {
       console.log("add custom pedalboard...");
       const dims = `${width}" x ${height}"`;
@@ -213,7 +214,7 @@ $(() => {
         </div>
       `;
 
-      $("#pp_canvas").prepend(pedalboard);
+      $(pedalboard).insertBefore("#multiplier");
       ds.setSelection(document.getElementById(`item-${serial}`));
 
       // ga("send", "event", "CustomPedalboard", "added", `${dims} ${name}`);
