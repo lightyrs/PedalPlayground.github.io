@@ -16,7 +16,8 @@ var gzip = require("gulp-gzip");
 var livereload = require("gulp-livereload");
 var notify = require("gulp-notify");
 var concat = require("gulp-concat");
-var imagemin = import("gulp-imagemin");
+var imagemin = require("gulp-imagemin");
+var rezzy = require("gulp-rezzy");
 var responsive = require("gulp-responsive");
 var cache = require("gulp-cached");
 var minify = require("gulp-minify");
@@ -119,15 +120,12 @@ gulp.task("process-images", function () {
     .src("app/images/pedals/*")
     .pipe(cache("images"))
     .pipe(
-      responsive({
-        "*.*": {
-          withoutEnlargement: false,
-          errorOnUnusedConfig: false,
-          width: "700",
-          height: "700",
-          max: true,
-        },
-      })
+      rezzy([{
+        width: 700,
+        height: 700,
+        fit: 'inside',
+        suffix: ''
+      }])
     )
     .pipe(imagemin())
     .pipe(gulp.dest("public/images/pedals/"));

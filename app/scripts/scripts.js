@@ -14,6 +14,7 @@ const collectionMap = {
 
 let ds = null;
 let historyBuffer = null;
+let multiplier = 25;
 
 $(() => {
   // Populate Pedalboards and Pedals lists
@@ -62,9 +63,9 @@ $(() => {
   historyBuffer.enable();
 
   // When user changes scale, update stuffs
-  $("#canvas-scale").on("change", () => {
+  $("#canvas-scale").on("change", (e) => {
     // update var
-    const multiplier = $(this).val();
+    const multiplier = $(e.currentTarget).val();
     $("#multiplier").val(multiplier);
 
     // Update scale of bg image
