@@ -11600,6 +11600,20 @@
 	},
 	{
 		"brand": "Fender",
+		"name": "Blender",
+		"width": 7.17,
+		"height": 4.64,
+		"image": "fender-blender.png"
+	},
+	{
+		"brand": "Fender",
+		"name": "Bubbler Chorus",
+		"width": 3.95,
+		"height": 5,
+		"image": "fender-bubbler.png"
+	},
+	{
+		"brand": "Fender",
 		"name": "Hammertone Delay",
 		"width": 2.44,
 		"height": 4.55,
