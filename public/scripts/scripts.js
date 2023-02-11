@@ -24565,7 +24565,7 @@ $(() => {
   });
 
   $(".pedalboard-list").on("select2:select", (event) => {
-    addCollectionItem("pedals", event.params.data.element);
+    addCollectionItem("pedalboards", event.params.data.element);
   });
 
   // Load canvas from localStorage if it has been saved prior
@@ -24853,6 +24853,8 @@ const readyCanvas = () => {
       autoScrollSpeed: 0.00001,
       overflowTolerance: { x: 0, y: 0 },
       keyboardDragSpeed: 1,
+      refreshMemoryRate: 100,
+      zoom: 1
     });
 
     ds.subscribe("callback", (callback_object) => {

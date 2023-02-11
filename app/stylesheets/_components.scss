@@ -17,12 +17,20 @@ body {
 }
 
 .site-header {
+  z-index: 12 !important;
+  border-bottom: $border;
   background: #fff;
   padding: 12px;
   position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  @media (prefers-color-scheme: dark) {
+    border-top: 1px solid #323037;
+    border-color: rgba(white, 0.1);
+    border: 0;
+  }
 
   h1 {
     text-transform: uppercase;
@@ -64,16 +72,17 @@ body {
 }
 
 .site-body {
-  border-top: $border;
+  overflow: hidden;
   min-height: 100vh;
   min-width: 1400px;
   position: relative;
+  background-image: url("../images/grid.svg");
+  background-color: #f8f8f8;
   @include flexbox;
 
   @media (prefers-color-scheme: dark) {
-    border-top: 1px solid #323037;
-    border-color: rgba(white, 0.1);
-    border: 0;
+    background-color: $canvas-bg-dark;
+    background-image: url("../images/grid-dark.svg");
   }
 }
 
@@ -153,6 +162,8 @@ body {
 }
 
 .sidebar {
+  z-index: 10;
+
   .select2-container {
     width: 100%;
   }
@@ -204,7 +215,6 @@ body {
 
   @media (min-width: 1024px) {
     max-width: 290px;
-    box-shadow: 0 1px 5px rgba(black, 0.16);
     background: #fff;
     border-right: $border;
 
@@ -235,13 +245,6 @@ body {
 .canvas {
   position: relative;
   overflow: hidden;
-  background-image: url("../images/grid.svg");
-  background-color: #f8f8f8;
-
-  @media (prefers-color-scheme: dark) {
-    background-color: $canvas-bg-dark;
-    background-image: url("../images/grid-dark.svg");
-  }
 
   * {
     -webkit-user-select: none;
@@ -468,10 +471,13 @@ body {
   z-index: 1 !important;
 
   &--custom {
-    border: 5px solid #ddd;
-    border-top-color: #ccc;
-    border-bottom-color: #ccc;
-    background: #222;
+
+    .artwork {
+      border: 5px solid #ddd;
+      border-top-color: #ccc;
+      border-bottom-color: #ccc;
+      background: #222;
+    }
   }
 }
 
