@@ -24982,9 +24982,9 @@ const getCollection = (collection) => {
     type: "GET",
     success(data) {
       data.sort((a, b) => {
-        if (`${a.brand}-${a.name}` < `${b.brand}-${b.name}`) {
+        if (`${a.Brand}-${a.Name}` < `${b.Brand}-${b.Name}`) {
           return -1;
-        } else if (`${b.brand}-${b.name}` < `${a.brand}-${a.name}`) {
+        } else if (`${b.Brand}-${b.Name}` < `${a.Brand}-${a.Name}`) {
           return 1;
         } else {
           return 0;
@@ -24995,7 +24995,7 @@ const getCollection = (collection) => {
   });
 }
 
-const renderCollectionItem = (itemType, { brand, name, width, height, image }) => {
+const renderCollectionItem = (itemType, { Brand: brand, Name: name, Width: width, Height: height, Image: image }) => {
   const option = commonTags.html`
     <option data-width="${width}" data-height="${height}" data-image="${image}">${brand} ${name}</option>
   `;

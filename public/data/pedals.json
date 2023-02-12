@@ -3621,8 +3621,8 @@
   {
     "Brand": "Boredbrain",
     "Name": "Terminal V2",
-    "Width": 2.5,
-    "Height": 1.75,
+    "Width": 2.75,
+    "Height": 4.5,
     "Image": "boredbrain-terminal-v2.png"
   },
   {
@@ -16834,6 +16834,13 @@
     "Height": 3.8,
     "Image": "jhs-whitey-tighty.png"
   },
+	{
+		"Brand": "JMK",
+		"Name": "CLOCKstep",
+		"Width": 4.72,
+		"Height": 4.72,
+		"Image": "jmk-clockstep.png"
+	},
   {
     "Brand": "Joe Gore",
     "Name": "Cult",
@@ -31677,8 +31684,8 @@
   {
     "Brand": "VFE",
     "Name": "Klein Bottle 2022",
-    "Width": 5.625,
-    "Height": 4.63,
+    "Width": 6.1,
+    "Height": 4.88,
     "Image": "vfe-klein-bottle-2022.png"
   },
   {
