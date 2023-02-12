@@ -41,6 +41,7 @@
     "gulp-responsive": "^3.0.1",
     "gulp-rezzy": "^2.0.0",
     "http-server": "^14.1.1",
+    "jsonfile": "^6.1.0",
     "prettier": "^2.7.1"
   },
   "scripts": {
