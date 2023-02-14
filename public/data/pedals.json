@@ -16834,13 +16834,13 @@
     "Height": 3.8,
     "Image": "jhs-whitey-tighty.png"
   },
-	{
-		"Brand": "JMK",
-		"Name": "CLOCKstep",
-		"Width": 4.72,
-		"Height": 4.72,
-		"Image": "jmk-clockstep.png"
-	},
+  {
+    "Brand": "JMK",
+    "Name": "CLOCKstep",
+    "Width": 4.72,
+    "Height": 4.72,
+    "Image": "jmk-clockstep.png"
+  },
   {
     "Brand": "Joe Gore",
     "Name": "Cult",
@@ -18318,6 +18318,13 @@
     "Height": 7,
     "Image": "kemper-remote.png"
   },
+	{
+		"Brand": "Kenton",
+		"Name": "THRU-5",
+		"Width": 3.937,
+		"Height": 1.9685,
+		"Image": "kenton-thru-5.png"
+	},
   {
     "Brand": "Kernom",
     "Name": "Ridge",
@@ -31935,6 +31942,13 @@
   },
   {
     "Brand": "Voodoo Lab",
+    "Name": "Pedal Power 3+",
+    "Width": 7,
+    "Height": 3.4,
+    "Image": "voodoolab-pp3-plus.png"
+  },
+  {
+    "Brand": "Voodoo Lab",
     "Name": "Pedal Power 4x4",
     "Width": 7,
     "Height": 3.4,
@@ -31961,6 +31975,13 @@
     "Height": 3.4,
     "Image": "voodoolab-mondo.png"
   },
+	{
+		"Brand": "Voodoo Lab",
+		"Name": "Pedal Power X8",
+		"Width": 5.5,
+		"Height": 2.75,
+		"Image": "voodoolab-pp-x8.png"
+	},
   {
     "Brand": "Voodoo Lab",
     "Name": "PX-8 Plus",

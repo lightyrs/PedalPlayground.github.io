@@ -117,7 +117,7 @@ gulp.task("scripts", function () {
 
 gulp.task("process-images", function () {
   return gulp
-    .src("app/images/pedals/*.png")
+    .src("app/images/pedals-new/*.png")
     .pipe(cache("images"))
     .pipe(
       rezzy([{
